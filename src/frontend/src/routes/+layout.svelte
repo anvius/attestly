@@ -19,15 +19,17 @@
   const goatCounterUrl = import.meta.env.VITE_GOATCOUNTER_URL as string | undefined;
 
   let languageMenuOpen = false;
-  const funnyMessagesES = [
-    "Hackathon build · DOCCUM en fase de pruebas",
-    "DOCCUM: Donde el software libre abraza a la criptografía",
-    "¡Tu código es ley, tu hash es eterno!"
+  const easterEggES = [
+    "A ver Midu, que me llamo Antonio...",
+    "IA generativa: chef certificado de bugs",
+    "SHA-256: el único hash que nunca hace drama",
+    "printf('hola mundo'); — inmortal desde el 72"
   ];
-  const funnyMessagesEN = [
-    "Hackathon build · DOCCUM is in testing phase",
-    "DOCCUM: Where Free Software hugs cryptography",
-    "Your code is law, your hash is eternal!"
+  const easterEggEN = [
+    "Hey Midu, just so you know — I'm Antonio",
+    "Generative AI: certified premium bug chef",
+    "SHA-256: the only hash with zero drama",
+    "printf('hello world'); — immortal since '72"
   ];
   let bannerIndex = 0;
   let hackathonBanner = "";
@@ -55,7 +57,7 @@
     }
 
     setInterval(() => {
-      bannerIndex = (bannerIndex + 1) % 3;
+      bannerIndex = bannerIndex + 1;
     }, 5500);
   });
 
@@ -69,8 +71,12 @@
   }
 
   $: t = $brandedT;
-  // activeBanner rotates through funny messages; never blocked by config
-  $: activeBanner = $language === "es" ? funnyMessagesES[bannerIndex] : funnyMessagesEN[bannerIndex];
+  $: _bannerES = hackathonBanner ? [hackathonBanner, ...easterEggES] : easterEggES;
+  $: _bannerEN = hackathonBanner ? [hackathonBanner, ...easterEggEN] : easterEggEN;
+  $: activeBanner =
+    $language === "es"
+      ? _bannerES[bannerIndex % _bannerES.length]
+      : _bannerEN[bannerIndex % _bannerEN.length];
 
   $: if (typeof document !== "undefined") {
     document.documentElement.setAttribute("lang", $language);
@@ -89,7 +95,9 @@
 
 <div class="page-shell">
   <header class="top-banner">
-    <div class="top-banner-inner">{activeBanner}</div>
+    {#key bannerIndex}
+      <div class="top-banner-inner">{activeBanner}</div>
+    {/key}
   </header>
 
   <header class="site-header">
