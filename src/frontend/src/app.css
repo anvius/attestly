@@ -40,6 +40,7 @@
 html,
 body {
   min-height: 100%;
+  overflow-x: clip;
 }
 
 html {
@@ -312,6 +313,8 @@ p {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .hero-copy .eyebrow {
@@ -329,10 +332,11 @@ p {
   font-size: clamp(32px, 5vw, 58px);
   line-height: 1.05;
   margin-bottom: 16px;
+  max-width: 100%;
 }
 
 .hero-copy p {
-  max-width: 62ch;
+  max-width: min(62ch, 100%);
   font-size: 20px;
   line-height: 1.5;
   margin: 0 auto;
@@ -722,6 +726,10 @@ p {
 @media (max-width: 640px) {
   .content-wrap {
     padding: 20px 14px 42px;
+  }
+
+  .hero-copy p {
+    font-size: 16px;
   }
 
   .site-header-inner {

@@ -18,29 +18,31 @@
   let secondOperand: number | null = null;
   let captchaToken = "";
 
-  function refreshCaptcha(): void {
-    firstOperand = null;
-    secondOperand = null;
-    void getContactConfig()
-      .then((config) => {
-        firstOperand = config.captcha.firstOperand;
-        secondOperand = config.captcha.secondOperand;
-        captchaToken = config.captcha.token ?? "";
-        captchaAnswer = "";
-      })
-      .catch(() => {
-        // Fallback for visual stability if backend fails
-        firstOperand = 2 + Math.floor(Math.random() * 11);
-        secondOperand = 2 + Math.floor(Math.random() * 11);
-        captchaToken = "";
-        captchaAnswer = "";
-      });
+  function generateLocalCaptcha(): void {
+    firstOperand = 2 + Math.floor(Math.random() * 11);
+    secondOperand = 2 + Math.floor(Math.random() * 11);
+    captchaToken = "";
+  }
+
+  generateLocalCaptcha();
+
+  async function refreshCaptcha(): Promise<void> {
+    captchaAnswer = "";
+
+    try {
+      const config = await getContactConfig();
+      firstOperand = config.captcha.firstOperand;
+      secondOperand = config.captcha.secondOperand;
+      captchaToken = config.captcha.token ?? "";
+    } catch {
+      generateLocalCaptcha();
+    }
   }
 
   $: t = copy[$language];
 
-  onMount(() => {
-    refreshCaptcha();
+  onMount(async () => {
+    await refreshCaptcha();
   });
 
   function onCaptchaInput(): void {
@@ -85,11 +87,11 @@
       name = "";
       email = "";
       message = "";
-      refreshCaptcha();
+      await refreshCaptcha();
     } catch {
       status = "";
       error = t.contactError;
-      refreshCaptcha();
+      await refreshCaptcha();
     } finally {
       loading = false;
     }
@@ -124,7 +126,7 @@
       <label class="sr-only" for="contact-honeypot">Do not fill this field</label>
       <input id="contact-honeypot" name="contact-honeypot" type="text" tabindex="-1" autocomplete="off" class="sr-only" bind:value={honeypot} />
 
-      <button class="btn btn-solid" type="button" disabled={loading} on:click={onSubmit}>
+      <button class="btn btn-solid" type="submit" disabled={loading}>
         {t.contactSubmit}
       </button>
 

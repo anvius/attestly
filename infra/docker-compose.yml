@@ -25,6 +25,20 @@ services:
     depends_on:
       - backend
 
+  analytics:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.analytics
+    ports:
+      - "${ANALYTICS_PORT:-8080}:8080"
+    environment:
+      - GOATCOUNTER_VHOST=localhost:${ANALYTICS_PORT:-8080}
+      - GOATCOUNTER_EMAIL=${GOATCOUNTER_EMAIL:-admin@doccum.com}
+      - GOATCOUNTER_PASSWORD=${GOATCOUNTER_PASSWORD:-changeme}
+    volumes:
+      - analytics-data:/data
+
 volumes:
   backend-data:
+  analytics-data:
 

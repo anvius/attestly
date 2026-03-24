@@ -12,6 +12,8 @@
     toggleTheme
   } from "$lib/preferences";
 
+  const goatCounterUrl = import.meta.env.VITE_GOATCOUNTER_URL as string | undefined;
+
   let languageMenuOpen = false;
   const funnyMessagesES = [
     "Hackathon build · DOCCUM en fase de pruebas",
@@ -68,6 +70,9 @@
 
 <svelte:head>
   <meta name="theme-color" content={$resolvedTheme === "dark" ? "#05070f" : "#f6f7fb"} />
+  {#if goatCounterUrl}
+    <script data-goatcounter="{goatCounterUrl}/count" async src="{goatCounterUrl}/count.js"></script>
+  {/if}
 </svelte:head>
 
 <a class="skip-link" href="#main-content">{t.skipToContent}</a>

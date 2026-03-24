@@ -1,0 +1,17 @@
+FROM alpine:3.20
+
+RUN apk add --no-cache ca-certificates
+
+ARG GOATCOUNTER_VERSION=v2.5.0
+ADD https://github.com/arp242/goatcounter/releases/download/${GOATCOUNTER_VERSION}/goatcounter-${GOATCOUNTER_VERSION}-linux-amd64.gz /tmp/goatcounter.gz
+RUN gunzip /tmp/goatcounter.gz && \
+    mv /tmp/goatcounter /usr/local/bin/goatcounter && \
+    chmod +x /usr/local/bin/goatcounter
+
+COPY infra/docker/goatcounter-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+VOLUME /data
+EXPOSE 8080
+
+ENTRYPOINT ["/entrypoint.sh"]

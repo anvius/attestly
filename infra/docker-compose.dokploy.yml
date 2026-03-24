@@ -33,5 +33,23 @@ services:
       - traefik.http.routers.doccum-frontend.tls.certresolver=letsencrypt
       - traefik.http.services.doccum-frontend.loadbalancer.server.port=4173
 
+  doccum-analytics:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.analytics
+    environment:
+      - GOATCOUNTER_VHOST=stats.doccum.com
+      - GOATCOUNTER_EMAIL=${GOATCOUNTER_EMAIL:-admin@doccum.com}
+      - GOATCOUNTER_PASSWORD=${GOATCOUNTER_PASSWORD:-changeme}
+    volumes:
+      - doccum-analytics-data:/data
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.doccum-analytics.rule=Host(`stats.doccum.com`)
+      - traefik.http.routers.doccum-analytics.entrypoints=websecure
+      - traefik.http.routers.doccum-analytics.tls.certresolver=letsencrypt
+      - traefik.http.services.doccum-analytics.loadbalancer.server.port=8080
+
 volumes:
   doccum-backend-data:
+  doccum-analytics-data:
