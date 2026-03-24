@@ -1,0 +1,11 @@
+**/node_modules
+**/.svelte-kit
+**/dist
+**/build
+**/coverage
+**/test-results
+.git
+.env
+.env.*
+var/log
+src/backend/doccum.db
