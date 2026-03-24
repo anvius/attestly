@@ -1,18 +1,6 @@
-import { Hono } from "hono";
+import { createServerApp } from "./shared/http/server";
 
-const app = new Hono();
-
-app.get("/health", (c) => {
-  return c.json({ status: "ok", service: "doccum-backend" });
-});
-
-app.post("/api/certify", (c) => {
-  return c.json({ message: "Not implemented yet" }, 501);
-});
-
-app.get("/api/cert/:id", (c) => {
-  return c.json({ id: c.req.param("id"), message: "Not implemented yet" }, 501);
-});
+const app = createServerApp();
 
 const port = Number(process.env.PORT ?? 3000);
 
