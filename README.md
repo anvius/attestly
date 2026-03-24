@@ -1,100 +1,142 @@
-# DocCum
+# DOCCUM
 
-DocCum is an MVP to certify the existence of files and text content by generating a SHA256 hash and a trusted server timestamp.
+> Certifica la existencia de archivos y textos con SHA-256 y marca de tiempo de confianza.
+
+[![CI](https://github.com/midudev/hackaton-cubepath-2026/actions/workflows/ci.yml/badge.svg)](https://github.com/midudev/hackaton-cubepath-2026/actions/workflows/ci.yml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Version](https://img.shields.io/badge/version-0.1.0-green)](package.json)
+[![Runtime: Bun](https://img.shields.io/badge/runtime-Bun-f9f1e1?logo=bun)](https://bun.sh)
+[![Frontend: SvelteKit](https://img.shields.io/badge/frontend-SvelteKit-ff3e00?logo=svelte)](https://kit.svelte.dev)
+
+DOCCUM permite a cualquier persona generar un **certificado criptográfico de existencia** para un documento o fragmento de texto. El contenido no se almacena: solo su huella SHA-256, una marca de tiempo UTC del servidor y el digest acumulativo de la cadena de certificados anterior.
+
+---
 
 ## Stack
 
-- Frontend: SvelteKit + Tailwind CSS
-- Backend: Bun + Hono
-- Database: SQLite
-- Containers: Docker Compose
+| Capa | Tecnología |
+|------|-----------|
+| Frontend | SvelteKit 2 + Svelte 5 + Tailwind CSS 3 |
+| Backend | Bun + Hono |
+| Base de datos | SQLite (`bun:sqlite`) |
+| Contenedores | Docker Compose + multi-stage builds |
+| Analytics | GoatCounter (cookieless, GDPR) |
 
-## Quick Start
+---
 
-1. Install dependencies:
+## Inicio rápido
 
-   bun --cwd src/backend install
-   bun --cwd src/frontend install
+```bash
+# 1. Instalar dependencias
+bun --cwd src/backend install
+bun --cwd src/frontend install
 
-2. Run locally:
+# 2. Configurar entorno (opcional para dev básico)
+cp .env.example .env
 
-   make dev
+# 3. Arrancar servidores en parallel
+make dev
+```
 
-3. Run tests:
+Abre [http://localhost:5173](http://localhost:5173).
 
-   make test-all
+### Todos los tests
 
-4. Validate architecture:
+```bash
+make test-all
+```
 
-   make validate-architecture
+### Validar arquitectura
 
-5. Start full container stack:
+```bash
+make validate-architecture
+```
 
-   make start-infra
+### Stack completo en Docker
 
-## Product Flow
+```bash
+make start-infra
+```
 
-1. User drops a file or pastes text in `/`.
-2. Frontend calls `POST /api/certify`.
-3. Backend computes SHA256, captures UTC timestamp, and attempts external time evidence snapshots from CubePath public pages.
-4. Backend links each certificate to previous digest (seeded chain model).
-5. Frontend redirects to `/cert/:id`.
-6. Public certificate page displays hash, timestamp, chain digest, previous digest, evidence hashes, and QR URL.
+---
 
-## Privacy Model
+## Flujo del producto
 
-- Original content is not stored.
-- File names are not stored.
-- Only minimal metadata and cryptographic evidence are persisted.
+1. El usuario arrastra un archivo o pega texto en `/`.
+2. El frontend llama a `POST /api/certify`.
+3. El backend calcula SHA-256, captura timestamp UTC y enlaza el certificado a la cadena anterior (seeded chain digest).
+4. El frontend redirige a `/cert/:id`.
+5. La página pública del certificado muestra hash, timestamp, digest de cadena, digest previo y QR con la URL.
 
-## Architecture Overview
+---
 
-The backend follows DDD with vertical slicing:
+## Privacidad
 
-- `src/backend/certification/domain`
-- `src/backend/certification/application`
-- `src/backend/certification/infrastructure`
+- El contenido original **no se almacena**.
+- No se almacenan nombres de archivo.
+- Solo se persiste metadata mínima y evidencia criptográfica.
+- Sin cookies de terceros. Sin tracking invasivo.
 
-Dependency direction:
+---
 
-`Infrastructure -> Application -> Domain`
+## Arquitectura
 
-### Testing Matrix
+DDD con vertical slicing. Cada feature es una columna autónoma:
 
-- Unit: domain + use cases (`src/backend/tests/certification/domain|application`)
-- Integration: providers/repositories/controllers (`src/backend/tests/certification/infrastructure`)
-- Acceptance: API end-to-end in-process (`src/backend/tests/acceptance`)
-- E2E: browser flow with Playwright (`src/frontend/tests/e2e`)
+```
+src/backend/
+├── certification/        ← feature: certificación
+│   ├── domain/           ← lógica de negocio pura
+│   ├── application/      ← casos de uso
+│   └── infrastructure/   ← adaptadores HTTP, SQLite, crypto
+├── contact/              ← feature: formulario de contacto
+│   ├── application/
+│   └── infrastructure/
+└── shared/               ← config, servidor, DB connection
+```
 
-## Frontend Experience
+Dirección de dependencias: `Infrastructure → Application → Domain`
 
-- Bilingual interface (Spanish/English).
-- Theme selector with system default (`system` / `light` / `dark`).
-- Process explainer page: `/process`.
-- About page with product origin context: `/about`.
-- FAQ and help pages: `/faq`, `/help`.
-- Legal pages: `/legal`, `/privacy`, `/terms`.
+### Matriz de tests
 
-## Contacto SMTP y Legal
+| Nivel | Qué cubre | Herramienta |
+|-------|-----------|-------------|
+| Unit | Domain + use cases | `bun:test` |
+| Integration | Providers, repos, controllers | `bun:test` |
+| Acceptance | API end-to-end en proceso | `bun:test` |
+| E2E | Flujo en navegador | Playwright |
 
-- Contacto: el formulario de `/contact` envía directamente a `POST /api/contact`.
-- Backend: el envío usa SMTP configurable en `etc/config.json` (`contact.smtp.host`, `port`, `secure`, `username`, `password`, `fromEmail`, `toEmail`).
-- Sin redirección a Gmail: la respuesta es `ok` y el usuario permanece en la aplicación.
-- Mapa legal público: `/legal` (información legal), `/privacy` (privacidad), `/terms` (condiciones), con acceso también desde el pie.
+---
 
-## Legal Note
+## Experiencia frontend
 
-The legal page is written to align the MVP with Spanish legal frameworks (RGPD/LOPDGDD/LSSI) for transparency and privacy-by-design, but it is not legal advice. Obtain legal counsel review before production deployment.
+- Interfaz bilingüe (Español / English).
+- Selector de tema (`system` / `light` / `dark`).
+- Página explicativa del proceso: `/process`.
+- FAQ y ayuda: `/help`.
+- Páginas legales: `/legal`, `/privacy`, `/terms`.
 
-## Versioning
+---
 
-Semantic Versioning (`X.Y.Z`) with pre-release major `0`.
+## Variables de entorno
 
-- New feature: bump minor
-- Fix: bump patch
-- Breaking changes are not allowed before `1.0.0`
+Consulta [`.env.example`](.env.example) para la lista completa con descripción.
 
-## License
+---
 
-GPL-3.0-or-later
+## Contribuir
+
+Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para setup local, convención de commits y reglas de arquitectura.
+
+---
+
+## Nota legal
+
+Las páginas legales alinean el MVP con RGPD/LOPDGDD/LSSI para transparencia y privacidad por diseño, pero no constituyen asesoramiento jurídico. Obtén revisión legal antes de despliegue en producción.
+
+---
+
+## Licencia
+
+[GPL-3.0-or-later](LICENSE)
 
