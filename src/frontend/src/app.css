@@ -136,6 +136,7 @@ p {
   background: linear-gradient(90deg, #6e3dff, #5a34dd);
   color: #f7f4ff;
   font-size: 13px;
+  cursor: default;
 }
 
 .top-banner-inner {

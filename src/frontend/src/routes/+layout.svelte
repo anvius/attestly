@@ -31,7 +31,12 @@
     "SHA-256: the only hash with zero drama",
     "printf('hello world'); — immortal since '72"
   ];
+  const defaultBannerES = "Hackathon build · producto experimental en evolución";
+  const defaultBannerEN = "Hackathon build · experimental product in progress";
+
   let bannerIndex = 0;
+  let hovering = false;
+  let hoverInterval: ReturnType<typeof setInterval> | undefined;
   let hackathonBanner = "";
 
   onMount(async () => {
@@ -61,6 +66,20 @@
     }, 5500);
   });
 
+  function startHoverRotation(): void {
+    hovering = true;
+    bannerIndex = 0;
+    hoverInterval = setInterval(() => {
+      bannerIndex = bannerIndex + 1;
+    }, 3000);
+  }
+
+  function stopHoverRotation(): void {
+    hovering = false;
+    if (hoverInterval) clearInterval(hoverInterval);
+    hoverInterval = undefined;
+  }
+
   function handleLanguageSelection(next: "es" | "en"): void {
     setLanguage(next);
     languageMenuOpen = false;
@@ -71,12 +90,11 @@
   }
 
   $: t = $brandedT;
-  $: _bannerES = hackathonBanner ? [hackathonBanner, ...easterEggES] : easterEggES;
-  $: _bannerEN = hackathonBanner ? [hackathonBanner, ...easterEggEN] : easterEggEN;
-  $: activeBanner =
-    $language === "es"
-      ? _bannerES[bannerIndex % _bannerES.length]
-      : _bannerEN[bannerIndex % _bannerEN.length];
+  $: baseBanner = hackathonBanner || ($language === "es" ? defaultBannerES : defaultBannerEN);
+  $: _easterEggs = $language === "es" ? easterEggES : easterEggEN;
+  $: activeBanner = hovering
+    ? _easterEggs[bannerIndex % _easterEggs.length]
+    : baseBanner;
 
   $: if (typeof document !== "undefined") {
     document.documentElement.setAttribute("lang", $language);
@@ -94,8 +112,9 @@
 <a class="skip-link" href="#main-content">{t.skipToContent}</a>
 
 <div class="page-shell">
-  <header class="top-banner">
-    {#key bannerIndex}
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <header class="top-banner" on:mouseenter={startHoverRotation} on:mouseleave={stopHoverRotation}>
+    {#key activeBanner}
       <div class="top-banner-inner">{activeBanner}</div>
     {/key}
   </header>
