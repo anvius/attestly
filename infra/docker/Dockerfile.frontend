@@ -1,0 +1,12 @@
+FROM oven/bun:1.2-alpine
+
+WORKDIR /app
+
+COPY src/frontend/package.json /app/package.json
+RUN bun install
+
+COPY src/frontend /app
+
+EXPOSE 4173
+
+CMD ["bun", "run", "dev", "--host", "0.0.0.0", "--port", "4173"]

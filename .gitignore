@@ -1,0 +1,10 @@
+node_modules/
+.svelte-kit/
+dist/
+build/
+coverage/
+*.log
+.env
+.env.*
+src/backend/doccum.db
+var/log/*.jsonl

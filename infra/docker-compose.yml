@@ -1,0 +1,25 @@
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+  frontend:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.frontend
+    ports:
+      - "4173:4173"
+    environment:
+      - PUBLIC_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+    depends_on:
+      - frontend

@@ -1,0 +1,15 @@
+{
+  "name": "doccum",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "src/backend",
+    "src/frontend"
+  ],
+  "scripts": {
+    "dev": "make dev",
+    "build": "make build",
+    "test": "make test-all",
+    "lint": "make lint"
+  }
+}

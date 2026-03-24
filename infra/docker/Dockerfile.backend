@@ -1,0 +1,12 @@
+FROM oven/bun:1.2-alpine
+
+WORKDIR /app
+
+COPY src/backend/package.json /app/package.json
+RUN bun install
+
+COPY src/backend /app
+
+EXPOSE 3000
+
+CMD ["bun", "run", "dev"]

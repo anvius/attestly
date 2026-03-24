@@ -1,0 +1,10 @@
+.env
+.env.*
+secrets/
+*.pem
+*.key
+dist/
+coverage/
+node_modules/
+src/backend/doccum.db
+var/log/
