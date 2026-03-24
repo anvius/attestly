@@ -1,21 +1,21 @@
 <script lang="ts">
-  import { copy } from "$lib/i18n";
-  import { language, ownerData } from "$lib/preferences";
+  import { language, ownerData, brandingData, brandedT } from "$lib/preferences";
 
-  $: t = copy[$language];
+  $: t = $brandedT;
   $: owner = $ownerData;
+  $: appName = $brandingData?.name ?? "DOCCUM";
 </script>
 
 <svelte:head>
-  <title>DOCCUM | {t.footerLinkHelp || "Ayuda"}</title>
+  <title>{appName} | {t.footerLinkHelp || "Ayuda"}</title>
 </svelte:head>
 
 <section class="content-page">
   <article class="content-card">
     {#if $language === "es"}
-      <h1>Ayuda y Sobre DOCCUM</h1>
+      <h1>Ayuda y Sobre {appName}</h1>
       <p>
-        <strong>DOCCUM</strong> nace en el entorno competitivo de investigación y desarrollo de la 
+        <strong>{appName}</strong> nace en el entorno competitivo de investigación y desarrollo de la 
         <a href="https://github.com/midudev/hackaton-cubepath-2026" rel="noopener" target="_blank">Hackathon CubePath 2026</a>.
         Su propósito inicial es dotar al usuario de una manera incuestionable, rápida y segura de probar que tenía poder o posesión de una pieza
         de información en un instante exacto de tiempo. Todo de forma completamente anónima.
@@ -23,13 +23,13 @@
 
       <h2>Nuestra Visión y Funcionalidad</h2>
       <p>
-        En DOCCUM aplicamos la filosofía estricta de diseño regida por Domain-Driven Design (DDD) con <em>Screaming Architecture</em>.
+        En {appName} aplicamos la filosofía estricta de diseño regida por Domain-Driven Design (DDD) con <em>Screaming Architecture</em>.
         El latido tecnológico detrás de nuestras estampas de tiempo (timestamps) ancla los registros haciendo uso de la infraestructura inmutable de <strong>cubepath.com</strong>, otorgándole mayor autoridad externa al certificado final e impidiendo que un atacante técnico altere las fechas.
       </p>
 
       <h2>Preguntas Frecuentes (FAQ)</h2>
       
-      <h3>¿DOCCUM guarda mi archivo original?</h3>
+      <h3>¿{appName} guarda mi archivo original?</h3>
       <p>
         En ningún caso. Nos caracterizamos por una estricta <strong>política de privacidad por diseño</strong>. 
         El archivo de entrada se procesa en memoria volátil de forma efímera para calcularle su firma matemática
@@ -49,9 +49,9 @@
       </p>
 
     {:else}
-      <h1>Help and About DOCCUM</h1>
+      <h1>Help and About {appName}</h1>
       <p>
-        <strong>DOCCUM</strong> was born in the competitive research and development context of the 
+        <strong>{appName}</strong> was born in the competitive research and development context of the 
         <a href="https://github.com/midudev/hackaton-cubepath-2026" rel="noopener" target="_blank">CubePath Hackathon 2026</a>.
         Its primary purpose is to provide the user with an unquestionable, fast, and secure way to prove possession over a piece
         of information at a very exact moment in time. All completely anonymously.
@@ -59,13 +59,13 @@
 
       <h2>Our Vision and Functionality</h2>
       <p>
-        Within DOCCUM we apply the strict design philosophy ruled by Domain-Driven Design (DDD) and <em>Screaming Architecture</em>.
+        Within {appName} we apply the strict design philosophy ruled by Domain-Driven Design (DDD) and <em>Screaming Architecture</em>.
         The technological heartbeat behind our timestamps anchors records utilizing the immutable infrastructure exposed by <strong>cubepath.com</strong>. This injects greater external authority into the final certificate and securely prevents manipulation.
       </p>
 
       <h2>Frequently Asked Questions (FAQ)</h2>
       
-      <h3>Does DOCCUM store my original file?</h3>
+      <h3>Does {appName} store my original file?</h3>
       <p>
         Absolutely not. We stand aggressively by a strict <strong>privacy-by-design policy</strong>. 
         The input file is only processed in ephemeral RAM memory just enough to compute its mathematical fingerprint

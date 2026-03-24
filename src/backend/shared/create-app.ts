@@ -41,12 +41,15 @@ export function createApp(): Hono {
   app.get("/health", (c) => c.json({ status: "ok", service: "doccum-backend" }));
   app.get("/api/public-config", (c) =>
     c.json({
+      branding: appConfig.branding,
+      identity: appConfig.identity,
       certification: {
         maxUploadBytes: appConfig.certification.maxUploadBytes
       },
       ui: {
         hackathonBanner: appConfig.ui.hackathonBanner
-      }
+      },
+      owner: appConfig.owner
     })
   );
   app.route(

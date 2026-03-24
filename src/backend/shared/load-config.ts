@@ -2,6 +2,22 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 export type AppConfig = {
+  branding: {
+    name: string;
+    domain: string;
+    taglineEs: string;
+    taglineEn: string;
+  };
+  identity: {
+    authorName: string;
+    authorUrl: string;
+    madeInLabel: string;
+    links: {
+      github: string;
+      codeberg: string;
+      mastodon: string;
+    };
+  };
   certification: {
     maxUploadBytes: number;
   };
@@ -34,6 +50,22 @@ export type AppConfig = {
 };
 
 const DEFAULT_CONFIG: AppConfig = {
+  branding: {
+    name: "DOCCUM",
+    domain: "doccum.com",
+    taglineEs: "Certificación criptográfica de documentos",
+    taglineEn: "Cryptographic document certification"
+  },
+  identity: {
+    authorName: "@anvius",
+    authorUrl: "https://anvius.com",
+    madeInLabel: "Mojácar",
+    links: {
+      github: "https://github.com/anvius/hackaton-midudev-2026",
+      codeberg: "https://codeberg.org/anvius",
+      mastodon: "https://fosstodon.org/@anvius"
+    }
+  },
   certification: {
     maxUploadBytes: 25 * 1024 * 1024
   },
@@ -83,6 +115,52 @@ function parseConfig(raw: unknown): AppConfig {
   const source = raw as Partial<AppConfig>;
 
   return {
+    branding: {
+      name:
+        typeof source.branding?.name === "string" && source.branding.name.trim().length > 0
+          ? source.branding.name.trim()
+          : DEFAULT_CONFIG.branding.name,
+      domain:
+        typeof source.branding?.domain === "string" && source.branding.domain.trim().length > 0
+          ? source.branding.domain.trim()
+          : DEFAULT_CONFIG.branding.domain,
+      taglineEs:
+        typeof source.branding?.taglineEs === "string" && source.branding.taglineEs.trim().length > 0
+          ? source.branding.taglineEs.trim()
+          : DEFAULT_CONFIG.branding.taglineEs,
+      taglineEn:
+        typeof source.branding?.taglineEn === "string" && source.branding.taglineEn.trim().length > 0
+          ? source.branding.taglineEn.trim()
+          : DEFAULT_CONFIG.branding.taglineEn
+    },
+    identity: {
+      authorName:
+        typeof source.identity?.authorName === "string" && source.identity.authorName.trim().length > 0
+          ? source.identity.authorName.trim()
+          : DEFAULT_CONFIG.identity.authorName,
+      authorUrl:
+        typeof source.identity?.authorUrl === "string" && source.identity.authorUrl.trim().length > 3
+          ? source.identity.authorUrl.trim()
+          : DEFAULT_CONFIG.identity.authorUrl,
+      madeInLabel:
+        typeof source.identity?.madeInLabel === "string" && source.identity.madeInLabel.trim().length > 0
+          ? source.identity.madeInLabel.trim()
+          : DEFAULT_CONFIG.identity.madeInLabel,
+      links: {
+        github:
+          typeof source.identity?.links?.github === "string" && source.identity.links.github.trim().length > 5
+            ? source.identity.links.github.trim()
+            : DEFAULT_CONFIG.identity.links.github,
+        codeberg:
+          typeof source.identity?.links?.codeberg === "string" && source.identity.links.codeberg.trim().length > 5
+            ? source.identity.links.codeberg.trim()
+            : DEFAULT_CONFIG.identity.links.codeberg,
+        mastodon:
+          typeof source.identity?.links?.mastodon === "string" && source.identity.links.mastodon.trim().length > 5
+            ? source.identity.links.mastodon.trim()
+            : DEFAULT_CONFIG.identity.links.mastodon
+      }
+    },
     certification: {
       maxUploadBytes:
         typeof source.certification?.maxUploadBytes === "number" && source.certification.maxUploadBytes > 0

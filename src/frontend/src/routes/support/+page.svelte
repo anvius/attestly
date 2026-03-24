@@ -1,9 +1,8 @@
 
 <script lang="ts">
-  import { copy } from "$lib/i18n";
-  import { language } from "$lib/preferences";
+  import { language, brandedT } from "$lib/preferences";
 
-  $: t = copy[$language];
+  $: t = $brandedT;
 </script>
 
 <svelte:head>

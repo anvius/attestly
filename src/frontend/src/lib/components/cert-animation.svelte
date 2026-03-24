@@ -8,20 +8,19 @@
   let t = $derived(copy[$language]);
 
   function startAnimation() {
-    if (animationTimer) return; // Si ya está animando, no hacemos nada
+    if (animationTimer) return;
     
-    currentTick = 0;
-    
+    currentTick = 1;
+
     animationTimer = setInterval(() => {
       currentTick += 1;
       
       if (currentTick > 15) { 
         clearInterval(animationTimer);
         animationTimer = null;
-        // Al terminar, volvemos a dejar la primera iluminada (estado inicial)
         currentTick = 0; 
       }
-    }, 850);
+    }, 300);
   }
 
   onMount(() => {

@@ -1,13 +1,26 @@
 import { derived, writable } from "svelte/store";
 import type { PublicConfigDto } from "./api";
-import type { Language } from "./i18n";
+import { copy, type Language } from "./i18n";
 
 export type ThemePreference = "system" | "light" | "dark";
 
 export const language = writable<Language>("es");
 export const themePreference = writable<ThemePreference>("system");
 export const ownerData = writable<PublicConfigDto["owner"] | null>(null);
+export const brandingData = writable<PublicConfigDto["branding"] | null>(null);
+export const identityData = writable<PublicConfigDto["identity"] | null>(null);
 const systemDark = writable(false);
+
+export const brandedT = derived([language, brandingData], ([$lang, $branding]) => {
+  const base = copy[$lang];
+  const name = $branding?.name ?? "DOCCUM";
+  if (name === "DOCCUM") return base;
+  const result = {} as Record<string, string>;
+  for (const [k, v] of Object.entries(base)) {
+    result[k] = v.replaceAll("DOCCUM", name);
+  }
+  return result as typeof base;
+});
 
 export const resolvedTheme = derived([themePreference, systemDark], ([$themePreference, $systemDark]) => {
   if ($themePreference === "system") {

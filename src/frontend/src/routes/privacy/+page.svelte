@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { copy } from "$lib/i18n";
-  import { language, ownerData } from "$lib/preferences";
+  import { language, ownerData, brandingData, brandedT } from "$lib/preferences";
 
-  $: t = copy[$language];
+  $: t = $brandedT;
   $: owner = $ownerData;
+  $: appName = $brandingData?.name ?? "DOCCUM";
 </script>
 
 <svelte:head>
@@ -15,7 +15,7 @@
     {#if $language === "es"}
       <h1>Política de Privacidad</h1>
       <p>
-        DOCCUM, proyecto desarrollado y mantenido en el contexto de la Hackathon CubePath, se compromete a
+        {appName}, proyecto desarrollado y mantenido en el contexto de la Hackathon CubePath, se compromete a
         proteger drásticamente su privacidad bajo la normativa europea (Reglamento UE 2016/679 - RGPD) y la
         normativa española (LOPDGDD 3/2018).
       </p>
@@ -30,7 +30,7 @@
 
       <h2>2. Minimización y Ausencia de Almacenamiento</h2>
       <p>
-        <strong>DOCCUM procesa pero NO guarda su archivo original.</strong> Toda la carga y firmado se
+        <strong>{appName} procesa pero NO guarda su archivo original.</strong> Toda la carga y firmado se
         realiza extrayendo el <em>hash</em> criptográfico (SHA-256) en una memoria efímera que
         está estrictamente limitada por middleware de tamaño (evitando violaciones de seguridad).
         Una vez extraído el hash, el archivo es permanentemente destruido.
@@ -57,7 +57,7 @@
 
       <h2>5. Proveedores y Evidencias de Terceros (Cesiones de Datos)</h2>
       <p>
-        DOCCUM consume la infraestructura de <strong>cubepath.com</strong> (patrocinadores del Hackathon). En su
+        {appName} consume la infraestructura de <strong>cubepath.com</strong> (patrocinadores del Hackathon). En su
         naturaleza de Oracle / Time-Stamper, nosotros consumimos su timestamp API pero en ningún punto exponemos
         identidad del usuario que sube el archivo, ya que actuamos íntegramente de manera técnica para capturar firmes.
         No existe transferencia de datos personales internacionales mediante la validación del hash.
@@ -66,13 +66,13 @@
       <h2>6. Derechos de los Interesados</h2>
       <p>
         Cualquier ciudadano europeo tiene derecho al Acceso, Rectificación, Supresión, Oposición y Limitación del
-        Tratamiento. Dado que el propio diseño de DOCCUM previene enlazar "identidad personal -> hash", la posibilidad de
+        Tratamiento. Dado que el propio diseño de {appName} previene enlazar "identidad personal -> hash", la posibilidad de
         supresión puede ser técnica si no es posible la identificación. Contacte a {owner?.contactEmail || "admin@doccum.example"}.
       </p>
     {:else}
       <h1>Privacy Policy</h1>
       <p>
-        DOCCUM, a project developed for the CubePath Hackathon, is committed to drastically protecting your
+        {appName}, a project developed for the CubePath Hackathon, is committed to drastically protecting your
         privacy under the European regulations (EU Regulation 2016/679 - GDPR) as well as the Spanish Law
         (LOPDGDD 3/2018).
       </p>
@@ -87,7 +87,7 @@
 
       <h2>2. Minimization and No Storage Approach</h2>
       <p>
-        <strong>DOCCUM processes but does NOT save your original file.</strong> All uploading and signing operations
+        <strong>{appName} processes but does NOT save your original file.</strong> All uploading and signing operations
         work by extracting the cryptographic <em>hash</em> (SHA-256) in an ephemeral memory container which is strictly limited
         by software middlewares (preventing security leaks). Right after hash extraction, the file is destroyed.
       </p>
@@ -111,14 +111,14 @@
 
       <h2>5. Third-Party Oracle Services</h2>
       <p>
-        DOCCUM natively utilizes operations from <strong>cubepath.com</strong> (official Hackathon sponsor). As an Oracle /
+        {appName} natively utilizes operations from <strong>cubepath.com</strong> (official Hackathon sponsor). As an Oracle /
         Time-Stamper, we consume their timestamp API, but we NEVER expose user identities. There is no international transfer
         of physical personal data, only hashes.
       </p>
 
       <h2>6. Data Subject Rights</h2>
       <p>
-        European citizens maintain their rights of Access, Rectification, Deletion, Objection, and Restriction. Since DOCCUM's design
+        European citizens maintain their rights of Access, Rectification, Deletion, Objection, and Restriction. Since {appName}'s design
         inherently prevents linking "personal identity -> hash", the rights of deletion might be technologically blocked if you
         cannot mechanically prove identity of the hash. Contact us at {owner?.contactEmail || "admin@doccum.example"}.
       </p>

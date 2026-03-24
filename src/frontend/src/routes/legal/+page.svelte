@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { copy } from "$lib/i18n";
-  import { language, ownerData } from "$lib/preferences";
+  import { language, ownerData, brandedT } from "$lib/preferences";
 
-  $: t = copy[$language];
+  $: t = $brandedT;
   $: owner = $ownerData;
 </script>
 

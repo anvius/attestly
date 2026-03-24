@@ -2,8 +2,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getContactConfig, sendContactMessage } from "$lib/api";
-  import { copy } from "$lib/i18n";
-  import { language } from "$lib/preferences";
+  import { language, brandedT } from "$lib/preferences";
 
   let name = "";
   let email = "";
@@ -39,7 +38,7 @@
     }
   }
 
-  $: t = copy[$language];
+  $: t = $brandedT;
 
   onMount(async () => {
     await refreshCaptcha();

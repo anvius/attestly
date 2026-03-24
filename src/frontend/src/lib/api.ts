@@ -17,6 +17,22 @@ export type CertificateDto = {
 };
 
 export type PublicConfigDto = {
+  branding: {
+    name: string;
+    domain: string;
+    taglineEs: string;
+    taglineEn: string;
+  };
+  identity: {
+    authorName: string;
+    authorUrl: string;
+    madeInLabel: string;
+    links: {
+      github: string;
+      codeberg: string;
+      mastodon: string;
+    };
+  };
   certification: {
     maxUploadBytes: number;
   };

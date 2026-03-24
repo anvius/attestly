@@ -3,8 +3,7 @@
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { certifyFile, getPublicConfig } from "$lib/api";
-  import { copy } from "$lib/i18n";
-  import { language } from "$lib/preferences";
+  import { language, brandedT } from "$lib/preferences";
   import { formatBytes } from "$lib/utils/format";
   import Hero from "$lib/components/hero.svelte";
   import FilePreview from "$lib/components/file-preview.svelte";
@@ -19,7 +18,7 @@
   let fileInput: HTMLInputElement | null = null;
   let inputFiles: FileList | null = null;
 
-  $: t = copy[$language];
+  $: t = $brandedT;
   $: isImage = selectedFile?.type.startsWith("image/") ?? false;
 
   function setSelectedFile(file: File | null): void {

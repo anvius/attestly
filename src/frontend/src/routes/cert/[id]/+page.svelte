@@ -3,8 +3,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import QrCode from "$lib/components/qr-code.svelte";
-  import { copy } from "$lib/i18n";
-  import { language } from "$lib/preferences";
+  import { language, brandedT } from "$lib/preferences";
 
   export let data: {
     certificate: {
@@ -30,7 +29,7 @@
   let copiedUrl = false;
   let certUrl = `/cert/${data.certificate.id}`;
 
-  $: t = copy[$language];
+  $: t = $brandedT;
   $: privacyText = t.certPrivacyBlock
     .replace("{storesOriginalContent}", String(data.certificate.storesOriginalContent))
     .replace("{storesFileName}", String(data.certificate.storesFileName));

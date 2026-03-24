@@ -1,4 +1,20 @@
 {
+  "branding": {
+    "name": "DOCCUM",
+    "domain": "doccum.com",
+    "taglineEs": "Certificación criptográfica de documentos",
+    "taglineEn": "Cryptographic document certification"
+  },
+  "identity": {
+    "authorName": "@anvius",
+    "authorUrl": "https://anvius.com",
+    "madeInLabel": "Mojácar",
+    "links": {
+      "github": "https://github.com/anvius/hackaton-midudev-2026",
+      "codeberg": "https://codeberg.org/anvius",
+      "mastodon": "https://fosstodon.org/@anvius"
+    }
+  },
   "certification": {
     "maxUploadBytes": 26214400
   },
