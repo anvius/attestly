@@ -15,15 +15,29 @@ describe("Controllers", () => {
           execute: async () =>
             CertificateFactory.create(
               "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-              Content.fromText("from-controller"),
-              new Date("2026-03-18T12:00:00.000Z")
+              Content.fromFile(new TextEncoder().encode("from-controller"), "text/plain", "from-controller.txt"),
+              new Date("2026-03-18T12:00:00.000Z"),
+              {
+                chainIndex: 0,
+                previousCertificateDigest:
+                  "0000000000000000000000000000000000000000000000000000000000000000",
+                cubepathUnixTimeCheckedAt: null,
+                cubepathUnixTimeSourceHash: null,
+                cubepathStatusCheckedAt: null,
+                cubepathStatusSourceHash: null
+              }
             )
         } as never
       })
     );
 
     const formData = new FormData();
-    formData.append("text", "from-controller");
+    formData.append(
+      "file",
+      new File([new TextEncoder().encode("from-controller")], "from-controller.txt", {
+        type: "text/plain"
+      })
+    );
 
     const response = await app.request("http://localhost/api/certify", {
       method: "POST",

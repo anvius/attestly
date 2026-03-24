@@ -1,118 +1,239 @@
-<script lang="ts">
-  import { goto } from "$app/navigation";
-  import { certifyFile, certifyText } from "$lib/api";
+<svelte:options runes={false} />
 
-  let text = "";
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { goto } from "$app/navigation";
+  import { certifyFile, getPublicConfig } from "$lib/api";
+  import { copy } from "$lib/i18n";
+  import { language } from "$lib/preferences";
+
   let selectedFile: File | null = null;
+  let imagePreviewUrl = "";
   let dragging = false;
   let loading = false;
   let status = "";
   let error = "";
+  let maxUploadBytes = 25 * 1024 * 1024;
+  let fileInput: HTMLInputElement | null = null;
+  let inputFiles: FileList | null = null;
+
+  $: t = copy[$language];
+  $: isImage = selectedFile?.type.startsWith("image/") ?? false;
+
+  function setSelectedFile(file: File | null): void {
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl);
+      imagePreviewUrl = "";
+    }
+
+    selectedFile = file;
+
+    if (file && file.type.startsWith("image/")) {
+      imagePreviewUrl = URL.createObjectURL(file);
+    }
+  }
 
   async function submitCertification(): Promise<void> {
+    if (!selectedFile) {
+      return;
+    }
+
     try {
       error = "";
       loading = true;
-      status = "Calculating Hash...";
+      status = t.loading;
 
-      const result = selectedFile
-        ? await certifyFile(selectedFile)
-        : await certifyText(text);
+      const result = await certifyFile(selectedFile);
 
-      status = "Certificate generated";
+      status = t.success;
       await goto(`/cert/${result.id}`);
     } catch {
-      error = "No fue posible certificar el contenido. Intenta nuevamente.";
+      error = t.error;
       status = "";
     } finally {
       loading = false;
     }
   }
 
+  function applyFiles(files: FileList | null): void {
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    if (files.length > 1) {
+      error = t.onlyOneFileError;
+      return;
+    }
+
+    const file = files[0] ?? null;
+    if (!file) {
+      return;
+    }
+
+    if (file.size > maxUploadBytes) {
+      error = t.fileTooLargeError;
+      return;
+    }
+
+    setSelectedFile(file);
+    error = "";
+  }
+
   function onDrop(event: DragEvent): void {
     event.preventDefault();
     dragging = false;
-    const file = event.dataTransfer?.files?.[0] ?? null;
-    selectedFile = file;
-    text = "";
+    applyFiles(event.dataTransfer?.files ?? null);
   }
 
   function onFileInputChange(event: Event): void {
-    const input = event.currentTarget as HTMLInputElement;
-    selectedFile = input.files?.[0] ?? null;
-    text = "";
+    const input = event.target as HTMLInputElement | null;
+    if (!input?.files || input.files.length === 0) {
+      setSelectedFile(null);
+      return;
+    }
+
+    applyFiles(input.files);
   }
 
-  $: canSubmit = (text.trim().length > 0 || selectedFile !== null) && !loading;
+  function triggerFilePicker(): void {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    fileInput?.click();
+  }
+
+  function onDropZoneKeyDown(event: KeyboardEvent): void {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      triggerFilePicker();
+    }
+  }
+
+  function formatBytes(bytes: number): string {
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+
+    const units = ["KB", "MB", "GB", "TB"];
+    let value = bytes / 1024;
+    let unitIndex = 0;
+
+    while (value >= 1024 && unitIndex < units.length - 1) {
+      value /= 1024;
+      unitIndex += 1;
+    }
+
+    return `${value.toFixed(2)} ${units[unitIndex]}`;
+  }
+
+  onMount(() => {
+    void getPublicConfig()
+      .then((config) => {
+        maxUploadBytes = config.certification.maxUploadBytes;
+      })
+      .catch(() => {
+        maxUploadBytes = 25 * 1024 * 1024;
+      });
+  });
+
+  $: if (inputFiles && inputFiles.length > 0) {
+    applyFiles(inputFiles);
+    inputFiles = null;
+  }
+
+  $: canSubmit = selectedFile !== null && !loading;
 </script>
 
-<main class="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-6 py-12">
-  <section class="glass-card fade-in rounded-3xl p-8 shadow-2xl shadow-black/30 sm:p-12">
-    <p class="text-sm uppercase tracking-[0.25em] text-trust-400">DocCum</p>
-    <h1 class="mt-4 text-4xl font-bold leading-tight sm:text-6xl">
-      Certifica archivos y texto en segundos
-    </h1>
-    <p class="mt-4 max-w-3xl text-base text-slate-300 sm:text-lg">
-      Genera una prueba criptografica de existencia con hash SHA256 y timestamp UTC de servidor.
-      Limpio, rapido y verificable por URL publica.
-    </p>
+<svelte:head>
+  <title>{t.homeTitle}</title>
+</svelte:head>
 
-    <div class="mt-10 grid gap-6 lg:grid-cols-2">
-      <button
-        type="button"
-        class={`rise rounded-2xl border-2 border-dashed p-8 text-left transition ${dragging ? "border-trust-400 bg-trust-500/10" : "border-slate-400/40 bg-slate-950/30"}`}
-        on:dragover|preventDefault={() => (dragging = true)}
-        on:dragleave={() => (dragging = false)}
-        on:drop={onDrop}
-      >
-        <p class="text-xs uppercase tracking-[0.24em] text-slate-400">Archivo</p>
-        <p class="mt-3 text-xl font-medium">Arrastra y suelta aqui</p>
-        <p class="mt-2 text-sm text-slate-300">o selecciona un archivo desde tu dispositivo</p>
+<section class="hero-wrap">
+  <div class="hero-copy">
+    <span class="eyebrow">{t.heroEyebrow}</span>
+    <h1>{t.heroTitle}</h1>
+    <p>{t.heroSubtitle}</p>
+    <p class="hint hint-strong">{t.heroDropGlobalHint}</p>
 
-        <label class="mt-5 inline-flex cursor-pointer items-center rounded-xl bg-trust-500 px-4 py-2 text-sm font-semibold text-ink-950 hover:bg-trust-400">
-          Seleccionar archivo
-          <input class="hidden" type="file" on:change={onFileInputChange} />
-        </label>
-
-        {#if selectedFile}
-          <p class="mt-4 break-all rounded-lg bg-slate-900/70 px-3 py-2 text-sm text-slate-200">
-            {selectedFile.name}
-          </p>
-        {/if}
-      </button>
-
-      <div class="rise rounded-2xl border border-slate-400/30 bg-slate-950/35 p-6">
-        <p class="text-xs uppercase tracking-[0.24em] text-slate-400">Texto</p>
-        <label class="mt-3 block text-sm text-slate-300" for="content-text">
-          Pega aqui el contenido a certificar
-        </label>
-        <textarea
-          id="content-text"
-          class="mt-2 h-44 w-full rounded-xl border border-slate-500/40 bg-slate-900/70 p-3 text-sm text-slate-100 outline-none transition focus:border-trust-400"
-          bind:value={text}
-          placeholder="Escribe o pega el texto..."
-          on:input={() => (selectedFile = null)}
-        ></textarea>
-
-        <button
-          class="mt-4 inline-flex items-center rounded-xl bg-trust-500 px-5 py-2.5 text-sm font-semibold text-ink-950 transition hover:bg-trust-400 disabled:cursor-not-allowed disabled:opacity-60"
-          on:click={submitCertification}
-          disabled={!canSubmit}
-        >
-          {#if loading}
-            Calculando Hash...
-          {:else}
-            Certificar Contenido
-          {/if}
-        </button>
-
-        {#if status}
-          <p class="mt-3 text-sm text-trust-400">{status}</p>
-        {/if}
-        {#if error}
-          <p class="mt-3 text-sm text-rose-300">{error}</p>
-        {/if}
+    <article class="demo-card" aria-label={t.demoTitle}>
+      <h2>{t.demoTitle}</h2>
+      <div class="demo-steps">
+        <p>{t.demoStep1}</p>
+        <p>{t.demoStep2}</p>
+        <p>{t.demoStep3}</p>
       </div>
-    </div>
-  </section>
-</main>
+      <p class="hint">
+        {#if $language === "es"}
+          Flujo real: hash SHA256 -> sello temporal UTC -> enlace verificable con QR.
+        {:else}
+          Real flow: SHA256 hash -> UTC timestamp -> verifiable URL with QR.
+        {/if}
+      </p>
+    </article>
+  </div>
+
+  <div
+    role="button"
+    tabindex="0"
+    aria-label={t.dropZoneAria}
+    aria-describedby="dropzone-kbd-hint"
+    class={`upload-card ${dragging ? "upload-card-dragging" : ""}`}
+    on:dragover|preventDefault={() => (dragging = true)}
+    on:dragleave={() => (dragging = false)}
+    on:drop={onDrop}
+    on:keydown={onDropZoneKeyDown}
+  >
+    <h2>{t.uploadTitle}</h2>
+    <p class="hint">{t.uploadHint}</p>
+    <p class="hint">{t.uploadTypes}</p>
+    <p id="dropzone-kbd-hint" class="sr-only">{t.dropZoneKeyboardHint}</p>
+
+    <button class="btn btn-solid" type="button" on:click={triggerFilePicker}>{t.selectFile}</button>
+    <input
+      bind:this={fileInput}
+      bind:files={inputFiles}
+      id="certificate-file"
+      class="sr-only"
+      type="file"
+      name="certificate-file"
+      on:input={onFileInputChange}
+      on:change={onFileInputChange}
+    />
+
+    {#if selectedFile}
+      <div class="file-meta">
+        <span class={`file-badge ${isImage ? "file-badge-image" : "file-badge-doc"}`}>
+          {isImage ? t.fileBadgeImage : t.fileBadgeDocument}
+        </span>
+        <p><strong>{t.fileNameLabel}:</strong> {selectedFile.name}</p>
+        <p><strong>{t.fileTypeLabel}:</strong> {selectedFile.type || "application/octet-stream"}</p>
+        <p><strong>{t.fileSizeLabel}:</strong> {formatBytes(selectedFile.size)}</p>
+      </div>
+
+      {#if isImage && imagePreviewUrl}
+        <div class="image-preview-wrap">
+          <p class="hint"><strong>{t.filePreviewLabel}</strong></p>
+          <img src={imagePreviewUrl} alt={selectedFile.name} class="image-preview" width="420" height="220" />
+        </div>
+      {/if}
+
+      <p class="hint">{t.fileOnlyPolicy}</p>
+    {/if}
+
+    <button class="btn btn-solid certify-button" type="button" on:click={submitCertification} disabled={!canSubmit}>
+      {#if loading}
+        {t.loading}
+      {:else}
+        {t.certify}
+      {/if}
+    </button>
+
+    {#if status}
+      <p aria-live="polite" class="status-ok">{status}</p>
+    {/if}
+    {#if error}
+      <p aria-live="polite" class="status-error">{error}</p>
+    {/if}
+  </div>
+</section>

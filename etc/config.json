@@ -1,0 +1,24 @@
+{
+  "certification": {
+    "maxUploadBytes": 26214400
+  },
+  "contact": {
+    "defaultSubject": "Contacto desde DocCum",
+    "smtp": {
+      "host": "smtp.example.com",
+      "port": 587,
+      "secure": false,
+      "username": "doccum-bot@example.com",
+      "password": "change-me",
+      "fromEmail": "doccum-bot@example.com",
+      "toEmail": "contacto@doccum.example"
+    },
+    "captcha": {
+      "firstOperand": 7,
+      "secondOperand": 5
+    }
+  },
+  "ui": {
+    "hackathonBanner": "Hackathon build · producto experimental en evolución"
+  }
+}

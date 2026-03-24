@@ -4,6 +4,7 @@ import { Content } from "../../domain/content";
 
 type Dependencies = {
   certifyContentUseCase: CertifyContentUseCase;
+  maxUploadBytes?: number;
 };
 
 function mapCertificateToDto(certificate: {
@@ -13,6 +14,15 @@ function mapCertificateToDto(certificate: {
   fileName: string | null;
   contentType: string | null;
   originalContentPreview: string | null;
+  chainIndex: number;
+  previousCertificateDigest: string;
+  certificateDigest: string;
+  cubepathUnixTimeCheckedAt: Date | null;
+  cubepathUnixTimeSourceHash: string | null;
+  cubepathStatusCheckedAt: Date | null;
+  cubepathStatusSourceHash: string | null;
+  storesFileName: boolean;
+  storesOriginalContent: boolean;
 }) {
   return {
     id: certificate.id,
@@ -20,29 +30,37 @@ function mapCertificateToDto(certificate: {
     timestamp: certificate.timestamp.toISOString(),
     fileName: certificate.fileName,
     contentType: certificate.contentType,
-    originalContentPreview: certificate.originalContentPreview
+    originalContentPreview: certificate.originalContentPreview,
+    chainIndex: certificate.chainIndex,
+    previousCertificateDigest: certificate.previousCertificateDigest,
+    certificateDigest: certificate.certificateDigest,
+    cubepathUnixTimeCheckedAt: certificate.cubepathUnixTimeCheckedAt?.toISOString() ?? null,
+    cubepathUnixTimeSourceHash: certificate.cubepathUnixTimeSourceHash,
+    cubepathStatusCheckedAt: certificate.cubepathStatusCheckedAt?.toISOString() ?? null,
+    cubepathStatusSourceHash: certificate.cubepathStatusSourceHash,
+    storesFileName: certificate.storesFileName,
+    storesOriginalContent: certificate.storesOriginalContent
   };
 }
 
-export function buildCertifyController({ certifyContentUseCase }: Dependencies): Hono {
+export function buildCertifyController({ certifyContentUseCase, maxUploadBytes = 25 * 1024 * 1024 }: Dependencies): Hono {
   const router = new Hono();
 
   router.post("/certify", async (c) => {
     const body = await c.req.parseBody();
-    const text = body.text;
     const file = body.file;
 
     try {
-      let content: Content;
-
-      if (typeof text === "string" && text.trim().length > 0) {
-        content = Content.fromText(text);
-      } else if (file instanceof File) {
-        const bytes = new Uint8Array(await file.arrayBuffer());
-        content = Content.fromFile(bytes, file.type || "application/octet-stream", file.name || null);
-      } else {
-        return c.json({ error: "Either text or file must be provided" }, 400);
+      if (!(file instanceof File)) {
+        return c.json({ error: "A single file must be provided" }, 400);
       }
+
+      if (file.size > maxUploadBytes) {
+        return c.json({ error: `File size exceeds limit of ${maxUploadBytes} bytes` }, 400);
+      }
+
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const content = Content.fromFile(bytes, file.type || "application/octet-stream", file.name || null);
 
       const certificate = await certifyContentUseCase.execute({ content, timestamp: new Date() });
       return c.json(mapCertificateToDto(certificate), 201);

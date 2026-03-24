@@ -1,15 +1,29 @@
-FROM oven/bun:1.2-alpine
+FROM oven/bun:1.2-alpine AS build
 
 WORKDIR /app
 
-COPY src/frontend/package.json /app/package.json
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+
+COPY src/frontend/package.json ./package.json
 RUN bun install --frozen-lockfile
 
-COPY src/frontend /app
-
+COPY src/frontend .
 RUN bun run build
+
+FROM oven/bun:1.2-alpine AS runtime
+
+WORKDIR /app
+
+COPY src/frontend/package.json ./package.json
+RUN bun install --frozen-lockfile --production
+
+COPY --from=build /app/build ./build
+
+ENV HOST=0.0.0.0
+ENV PORT=4173
 
 EXPOSE 4173
 
-CMD ["bun", "run", "preview", "--host", "0.0.0.0", "--port", "4173"]
+CMD ["bun", "build/index.js"]
 

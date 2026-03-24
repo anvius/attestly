@@ -22,7 +22,16 @@ export function buildGetCertificateController({ getCertificateUseCase }: Depende
       timestamp: certificate.timestamp.toISOString(),
       fileName: certificate.fileName,
       contentType: certificate.contentType,
-      originalContentPreview: certificate.originalContentPreview
+      originalContentPreview: certificate.originalContentPreview,
+      chainIndex: certificate.chainIndex,
+      previousCertificateDigest: certificate.previousCertificateDigest,
+      certificateDigest: certificate.certificateDigest,
+      cubepathUnixTimeCheckedAt: certificate.cubepathUnixTimeCheckedAt?.toISOString() ?? null,
+      cubepathUnixTimeSourceHash: certificate.cubepathUnixTimeSourceHash,
+      cubepathStatusCheckedAt: certificate.cubepathStatusCheckedAt?.toISOString() ?? null,
+      cubepathStatusSourceHash: certificate.cubepathStatusSourceHash,
+      storesFileName: certificate.storesFileName,
+      storesOriginalContent: certificate.storesOriginalContent
     });
   });
 

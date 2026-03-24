@@ -1,0 +1,37 @@
+services:
+  doccum-backend:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.backend
+    environment:
+      - PORT=3000
+      - DB_PATH=/data/doccum.db
+    volumes:
+      - doccum-backend-data:/data
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.doccum-backend.rule=Host(`api.doccum.com`)
+      - traefik.http.routers.doccum-backend.entrypoints=websecure
+      - traefik.http.routers.doccum-backend.tls.certresolver=letsencrypt
+      - traefik.http.services.doccum-backend.loadbalancer.server.port=3000
+
+  doccum-frontend:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.frontend
+    environment:
+      - HOST=0.0.0.0
+      - PORT=4173
+      - ORIGIN=https://doccum.com
+      - VITE_API_BASE_URL=https://api.doccum.com
+    depends_on:
+      - doccum-backend
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.doccum-frontend.rule=Host(`doccum.com`)
+      - traefik.http.routers.doccum-frontend.entrypoints=websecure
+      - traefik.http.routers.doccum-frontend.tls.certresolver=letsencrypt
+      - traefik.http.services.doccum-frontend.loadbalancer.server.port=4173
+
+volumes:
+  doccum-backend-data:

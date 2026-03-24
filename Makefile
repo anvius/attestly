@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: dev dev-backend dev-frontend build test-all lint start-infra stop-infra test-docker validate-architecture deploy
+.PHONY: dev dev-backend dev-frontend build test-all lint start-infra up-infra stop-infra test-docker validate-architecture deploy
 
 dev:
 	@echo "Starting backend and frontend in parallel"
@@ -25,16 +25,36 @@ lint:
 	cd src/frontend && bun run lint
 
 start-infra:
-	docker compose -f infra/docker-compose.yml up -d
+	docker compose -f infra/docker-compose.yml up -d --build --remove-orphans
+
+up-infra: start-infra
+	@echo "Frontend: http://localhost:$${FRONTEND_PORT:-4174}"
+	@echo "Backend health: http://localhost:$${BACKEND_PORT:-3001}/health"
 
 stop-infra:
-	docker compose -f infra/docker-compose.yml down
+	docker compose -f infra/docker-compose.yml down --remove-orphans
 
 test-docker: start-infra
-	docker compose -f infra/docker-compose.yml exec backend bun test
-	docker compose -f infra/docker-compose.yml exec frontend bun run check
-	docker compose -f infra/docker-compose.yml exec frontend bun run lint
-	docker compose -f infra/docker-compose.yml exec frontend bun run build
+	@timeout=90; \
+	until curl -fsS "http://localhost:$${BACKEND_PORT:-3001}/health" >/dev/null; do \
+		timeout=$$((timeout - 1)); \
+		if [ $$timeout -le 0 ]; then \
+			echo "Backend health check timed out"; \
+			$(MAKE) stop-infra; \
+			exit 1; \
+		fi; \
+		sleep 1; \
+	done
+	@timeout=90; \
+	until curl -fsS "http://localhost:$${FRONTEND_PORT:-4174}" | grep -qi "DocCum"; do \
+		timeout=$$((timeout - 1)); \
+		if [ $$timeout -le 0 ]; then \
+			echo "Frontend smoke check timed out"; \
+			$(MAKE) stop-infra; \
+			exit 1; \
+		fi; \
+		sleep 1; \
+	done
 	$(MAKE) stop-infra
 
 validate-architecture:

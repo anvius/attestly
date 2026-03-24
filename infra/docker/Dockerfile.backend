@@ -1,13 +1,22 @@
-FROM oven/bun:1.2-alpine
+FROM oven/bun:1.2-alpine AS build
 
 WORKDIR /app
 
-COPY src/backend/package.json /app/package.json
+COPY src/backend/package.json ./package.json
 RUN bun install --frozen-lockfile
 
-COPY src/backend /app
-
+COPY src/backend .
 RUN bun run build
+
+FROM oven/bun:1.2-alpine AS runtime
+
+WORKDIR /app
+
+COPY src/backend/package.json ./package.json
+RUN bun install --frozen-lockfile --production
+
+COPY --from=build /app/dist ./dist
+COPY etc ./etc
 
 EXPOSE 3000
 
