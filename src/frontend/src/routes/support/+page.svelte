@@ -1,4 +1,3 @@
-<svelte:options runes={false} />
 
 <script lang="ts">
   import { copy } from "$lib/i18n";

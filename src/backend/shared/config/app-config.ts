@@ -24,6 +24,13 @@ export type AppConfig = {
   ui: {
     hackathonBanner: string;
   };
+  owner: {
+    legalName: string;
+    tin: string;
+    address: string;
+    contactEmail: string;
+    url: string;
+  };
 };
 
 const DEFAULT_CONFIG: AppConfig = {
@@ -31,7 +38,7 @@ const DEFAULT_CONFIG: AppConfig = {
     maxUploadBytes: 25 * 1024 * 1024
   },
   contact: {
-    defaultSubject: "Contacto desde DocCum",
+    defaultSubject: "Contacto desde DOCCUM",
     smtp: {
       host: "smtp.example.com",
       port: 587,
@@ -48,6 +55,13 @@ const DEFAULT_CONFIG: AppConfig = {
   },
   ui: {
     hackathonBanner: "Hackathon build · producto experimental en evolucion"
+  },
+  owner: {
+    legalName: "Developer / DOCCUM Owner",
+    tin: "00000000X",
+    address: "Calle Hackaton 123",
+    contactEmail: "admin@example.com",
+    url: "https://example.com"
   }
 };
 
@@ -94,13 +108,15 @@ function parseConfig(raw: unknown): AppConfig {
             ? source.contact.smtp.secure
             : DEFAULT_CONFIG.contact.smtp.secure,
         username:
-          typeof source.contact?.smtp?.username === "string" && source.contact.smtp.username.trim().length > 2
+          process.env.SMTP_USERNAME ?? 
+          (typeof source.contact?.smtp?.username === "string" && source.contact.smtp.username.trim().length > 2
             ? source.contact.smtp.username.trim()
-            : DEFAULT_CONFIG.contact.smtp.username,
+            : DEFAULT_CONFIG.contact.smtp.username),
         password:
-          typeof source.contact?.smtp?.password === "string" && source.contact.smtp.password.trim().length > 0
+          process.env.SMTP_PASSWORD ?? 
+          (typeof source.contact?.smtp?.password === "string" && source.contact.smtp.password.trim().length > 0
             ? source.contact.smtp.password
-            : DEFAULT_CONFIG.contact.smtp.password,
+            : DEFAULT_CONFIG.contact.smtp.password),
         fromEmail:
           typeof source.contact?.smtp?.fromEmail === "string" && source.contact.smtp.fromEmail.trim().length > 3
             ? source.contact.smtp.fromEmail.trim()
@@ -126,6 +142,28 @@ function parseConfig(raw: unknown): AppConfig {
         typeof source.ui?.hackathonBanner === "string" && source.ui.hackathonBanner.trim().length > 5
           ? source.ui.hackathonBanner.trim()
           : DEFAULT_CONFIG.ui.hackathonBanner
+    },
+    owner: {
+      legalName:
+        typeof source.owner?.legalName === "string" && source.owner.legalName.trim().length > 2
+          ? source.owner.legalName.trim()
+          : DEFAULT_CONFIG.owner.legalName,
+      tin:
+        typeof source.owner?.tin === "string" && source.owner.tin.trim().length > 1
+          ? source.owner.tin.trim()
+          : DEFAULT_CONFIG.owner.tin,
+      address:
+        typeof source.owner?.address === "string" && source.owner.address.trim().length > 5
+          ? source.owner.address.trim()
+          : DEFAULT_CONFIG.owner.address,
+      contactEmail:
+        typeof source.owner?.contactEmail === "string" && source.owner.contactEmail.trim().length > 5
+          ? source.owner.contactEmail.trim()
+          : DEFAULT_CONFIG.owner.contactEmail,
+      url:
+        typeof source.owner?.url === "string" && source.owner.url.trim().length > 5
+          ? source.owner.url.trim()
+          : DEFAULT_CONFIG.owner.url
     }
   };
 }

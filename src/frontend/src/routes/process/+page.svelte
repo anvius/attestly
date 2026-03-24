@@ -1,4 +1,3 @@
-<svelte:options runes={false} />
 
 <script lang="ts">
   import { copy } from "$lib/i18n";
@@ -17,7 +16,7 @@
 
     {#if $language === "es"}
       <p>
-        DocCum es un sistema de certificación digital orientado a demostrar existencia e integridad de archivos en un momento
+        DOCCUM es un sistema de certificación digital orientado a demostrar existencia e integridad de archivos en un momento
         determinado. No funciona como repositorio documental: su objetivo principal es generar evidencia técnica verificable,
         minimizando al máximo el tratamiento de datos personales y contenido sensible.
       </p>
@@ -46,7 +45,7 @@
 
       <h2>Qué Guarda y Qué No Guarda</h2>
       <p>
-        DocCum no almacena el contenido original del archivo ni su nombre completo. Se conserva un resumen seguro con tipo,
+        DOCCUM no almacena el contenido original del archivo ni su nombre completo. Se conserva un resumen seguro con tipo,
         tamaño y una pista mínima no sensible para contexto operacional.
       </p>
       <p>
@@ -100,7 +99,7 @@
       </p>
     {:else}
       <p>
-        DocCum is a digital certification system designed to prove file existence and integrity at a specific time. It is not a
+        DOCCUM is a digital certification system designed to prove file existence and integrity at a specific time. It is not a
         document repository: the primary goal is to generate verifiable technical evidence while minimizing personal data and
         sensitive content processing.
       </p>
@@ -127,7 +126,7 @@
 
       <h2>What Is Stored and What Is Not</h2>
       <p>
-        DocCum does not store original file content or full file names. It keeps a safe summary with type, size and a minimal
+        DOCCUM does not store original file content or full file names. It keeps a safe summary with type, size and a minimal
         non-sensitive hint for operational context.
       </p>
       <p>

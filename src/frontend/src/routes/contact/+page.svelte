@@ -1,4 +1,3 @@
-<svelte:options runes={false} />
 
 <script lang="ts">
   import { onMount } from "svelte";
@@ -15,34 +14,44 @@
   let status = "";
   let error = "";
 
-  let firstOperand = 7;
-  let secondOperand = 5;
+  let firstOperand: number | null = null;
+  let secondOperand: number | null = null;
+  let captchaToken = "";
 
-  $: t = copy[$language];
-
-  onMount(() => {
+  function refreshCaptcha(): void {
+    firstOperand = null;
+    secondOperand = null;
     void getContactConfig()
       .then((config) => {
         firstOperand = config.captcha.firstOperand;
         secondOperand = config.captcha.secondOperand;
+        captchaToken = config.captcha.token ?? "";
+        captchaAnswer = "";
       })
       .catch(() => {
-        firstOperand = 7;
-        secondOperand = 5;
+        // Fallback for visual stability if backend fails
+        firstOperand = 2 + Math.floor(Math.random() * 11);
+        secondOperand = 2 + Math.floor(Math.random() * 11);
+        captchaToken = "";
+        captchaAnswer = "";
       });
+  }
+
+  $: t = copy[$language];
+
+  onMount(() => {
+    refreshCaptcha();
   });
 
   function onCaptchaInput(): void {
     if (captchaAnswer === "") {
-      if (error === t.contactError) {
-        error = "";
-      }
+      if (error === t.contactError) error = "";
       return;
     }
 
-    if (Number(captchaAnswer) !== firstOperand + secondOperand) {
-      status = "";
-      error = t.contactError;
+    if (firstOperand === null || secondOperand === null || Number(captchaAnswer) !== firstOperand + secondOperand) {
+      // Don't show error immediately on typing, let onSubmit handle it,
+      // but clear previous errors if it's correct.
       return;
     }
 
@@ -52,7 +61,7 @@
   }
 
   async function onSubmit(): Promise<void> {
-    if (Number(captchaAnswer) !== firstOperand + secondOperand) {
+    if (firstOperand === null || secondOperand === null || Number(captchaAnswer) !== firstOperand + secondOperand) {
       status = "";
       error = t.contactError;
       return;
@@ -67,6 +76,7 @@
         name,
         email,
         message,
+        captchaToken,
         captchaAnswer: Number(captchaAnswer),
         honeypot
       });
@@ -75,11 +85,11 @@
       name = "";
       email = "";
       message = "";
-      captchaAnswer = "";
-      honeypot = "";
+      refreshCaptcha();
     } catch {
       status = "";
       error = t.contactError;
+      refreshCaptcha();
     } finally {
       loading = false;
     }
@@ -103,11 +113,11 @@
       <input id="contact-email" name="contact-email" type="email" autocomplete="email" required bind:value={email} />
 
       <label for="contact-message">{t.contactFormMessage}</label>
-      <textarea id="contact-message" name="contact-message" rows="6" required bind:value={message}></textarea>
+      <textarea id="contact-message" name="contact-message" rows="6" minlength="20" required bind:value={message}></textarea>
 
       <label for="contact-captcha">{t.contactCaptchaLabel}</label>
       <div class="captcha-row">
-        <span class="captcha-question">{firstOperand} + {secondOperand} =</span>
+        <span class="captcha-question">{firstOperand ?? "?"} + {secondOperand ?? "?"} =</span>
         <input id="contact-captcha" name="contact-captcha" type="number" required bind:value={captchaAnswer} on:input={onCaptchaInput} />
       </div>
 

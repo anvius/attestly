@@ -28,7 +28,7 @@
 
   let copiedHash = false;
   let copiedUrl = false;
-  let certUrl = "";
+  let certUrl = `/cert/${data.certificate.id}`;
 
   $: t = copy[$language];
   $: privacyText = t.certPrivacyBlock
@@ -36,7 +36,7 @@
     .replace("{storesFileName}", String(data.certificate.storesFileName));
 
   onMount(() => {
-    certUrl = window.location.href;
+    certUrl = window.location.href || `${window.location.origin}/cert/${data.certificate.id}`;
   });
 
   async function copyHash(): Promise<void> {

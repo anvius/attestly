@@ -26,13 +26,12 @@ export function createServerApp(): Hono {
   );
   const getCertificateUseCase = new GetCertificateUseCase(certificateRepository);
   const contactMessageSender: ContactMessageSender =
-    process.env.DISABLE_SMTP === "1"
+    process.env.DISABLE_SMTP === "1" || appConfig.contact.smtp.host === "smtp.example.com"
       ? {
           send: async () => undefined
         }
       : new SmtpContactMessageSender(appConfig.contact.smtp);
   const contactRequestUseCase = new ContactRequestUseCase(
-    appConfig.contact.captcha.firstOperand + appConfig.contact.captcha.secondOperand,
     contactMessageSender,
     appConfig.contact.defaultSubject
   );
@@ -47,7 +46,8 @@ export function createServerApp(): Hono {
       },
       ui: {
         hackathonBanner: appConfig.ui.hackathonBanner
-      }
+      },
+      owner: appConfig.owner
     })
   );
   app.route(
@@ -61,9 +61,7 @@ export function createServerApp(): Hono {
   app.route(
     "/api",
     buildContactController({
-      contactRequestUseCase,
-      captchaFirstOperand: appConfig.contact.captcha.firstOperand,
-      captchaSecondOperand: appConfig.contact.captcha.secondOperand
+      contactRequestUseCase
     })
   );
 

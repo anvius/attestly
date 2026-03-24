@@ -1,4 +1,3 @@
-<svelte:options runes={false} />
 
 <script lang="ts">
   import { onMount } from "svelte";
@@ -6,6 +5,9 @@
   import { certifyFile, getPublicConfig } from "$lib/api";
   import { copy } from "$lib/i18n";
   import { language } from "$lib/preferences";
+  import { formatBytes } from "$lib/utils/format";
+  import Hero from "$lib/components/hero.svelte";
+  import FilePreview from "$lib/components/file-preview.svelte";
 
   let selectedFile: File | null = null;
   let imagePreviewUrl = "";
@@ -85,6 +87,18 @@
     applyFiles(event.dataTransfer?.files ?? null);
   }
 
+  function handleWindowDragOver(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer?.types?.includes("Files") || event.dataTransfer?.types?.includes("application/x-moz-file")) {
+      dragging = true;
+    }
+  }
+
+  function handleOverlayDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    dragging = false;
+  }
+
   function onFileInputChange(event: Event): void {
     const input = event.target as HTMLInputElement | null;
     if (!input?.files || input.files.length === 0) {
@@ -110,22 +124,7 @@
     }
   }
 
-  function formatBytes(bytes: number): string {
-    if (bytes < 1024) {
-      return `${bytes} B`;
-    }
 
-    const units = ["KB", "MB", "GB", "TB"];
-    let value = bytes / 1024;
-    let unitIndex = 0;
-
-    while (value >= 1024 && unitIndex < units.length - 1) {
-      value /= 1024;
-      unitIndex += 1;
-    }
-
-    return `${value.toFixed(2)} ${units[unitIndex]}`;
-  }
 
   onMount(() => {
     void getPublicConfig()
@@ -149,40 +148,28 @@
   <title>{t.homeTitle}</title>
 </svelte:head>
 
-<section class="hero-wrap">
-  <div class="hero-copy">
-    <span class="eyebrow">{t.heroEyebrow}</span>
-    <h1>{t.heroTitle}</h1>
-    <p>{t.heroSubtitle}</p>
-    <p class="hint hint-strong">{t.heroDropGlobalHint}</p>
+<svelte:window on:dragover={handleWindowDragOver} />
 
-    <article class="demo-card" aria-label={t.demoTitle}>
-      <h2>{t.demoTitle}</h2>
-      <div class="demo-steps">
-        <p>{t.demoStep1}</p>
-        <p>{t.demoStep2}</p>
-        <p>{t.demoStep3}</p>
-      </div>
-      <p class="hint">
-        {#if $language === "es"}
-          Flujo real: hash SHA256 -> sello temporal UTC -> enlace verificable con QR.
-        {:else}
-          Real flow: SHA256 hash -> UTC timestamp -> verifiable URL with QR.
-        {/if}
-      </p>
-    </article>
+{#if dragging}
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div
+    class="global-dropzone"
+    on:dragleave={handleOverlayDragLeave}
+    on:drop={onDrop}
+    on:dragover|preventDefault
+  >
+    <div class="global-dropzone-content">
+      <h2>{t.uploadTitle || "Suelta tu archivo aquí"}</h2>
+      <p class="hint">{t.uploadHint || "Certifica arrastrando en cualquier lugar"}</p>
+    </div>
   </div>
+{/if}
+
+<section class="hero-wrap">
+  <Hero />
 
   <div
-    role="button"
-    tabindex="0"
-    aria-label={t.dropZoneAria}
-    aria-describedby="dropzone-kbd-hint"
-    class={`upload-card ${dragging ? "upload-card-dragging" : ""}`}
-    on:dragover|preventDefault={() => (dragging = true)}
-    on:dragleave={() => (dragging = false)}
-    on:drop={onDrop}
-    on:keydown={onDropZoneKeyDown}
+    class="upload-card"
   >
     <h2>{t.uploadTitle}</h2>
     <p class="hint">{t.uploadHint}</p>
@@ -202,32 +189,23 @@
     />
 
     {#if selectedFile}
-      <div class="file-meta">
-        <span class={`file-badge ${isImage ? "file-badge-image" : "file-badge-doc"}`}>
-          {isImage ? t.fileBadgeImage : t.fileBadgeDocument}
-        </span>
-        <p><strong>{t.fileNameLabel}:</strong> {selectedFile.name}</p>
-        <p><strong>{t.fileTypeLabel}:</strong> {selectedFile.type || "application/octet-stream"}</p>
-        <p><strong>{t.fileSizeLabel}:</strong> {formatBytes(selectedFile.size)}</p>
-      </div>
-
-      {#if isImage && imagePreviewUrl}
-        <div class="image-preview-wrap">
-          <p class="hint"><strong>{t.filePreviewLabel}</strong></p>
-          <img src={imagePreviewUrl} alt={selectedFile.name} class="image-preview" width="420" height="220" />
-        </div>
-      {/if}
-
-      <p class="hint">{t.fileOnlyPolicy}</p>
+      <FilePreview
+        {selectedFile}
+        {imagePreviewUrl}
+        {isImage}
+        {t}
+      />
     {/if}
 
-    <button class="btn btn-solid certify-button" type="button" on:click={submitCertification} disabled={!canSubmit}>
-      {#if loading}
-        {t.loading}
-      {:else}
-        {t.certify}
-      {/if}
-    </button>
+    {#if selectedFile}
+      <button class="btn btn-solid certify-button" type="button" on:click={submitCertification} disabled={!canSubmit}>
+        {#if loading}
+          {t.loading}
+        {:else}
+          {t.certify}
+        {/if}
+      </button>
+    {/if}
 
     {#if status}
       <p aria-live="polite" class="status-ok">{status}</p>

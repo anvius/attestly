@@ -60,6 +60,9 @@ describe("Certification API acceptance", () => {
     process.env.DISABLE_SMTP = "1";
     const app = createServerApp();
 
+    const configRes = await app.request("http://localhost/api/contact/config");
+    const configBody = (await configRes.json()) as { captcha: { firstOperand: number; secondOperand: number; token: string } };
+
     const response = await app.request("http://localhost/api/contact", {
       method: "POST",
       headers: {
@@ -69,7 +72,8 @@ describe("Certification API acceptance", () => {
         name: "Ada Lovelace",
         email: "ada@example.com",
         message: "Necesito ayuda con una certificacion",
-        captchaAnswer: 12,
+        captchaToken: configBody.captcha.token,
+        captchaAnswer: configBody.captcha.firstOperand + configBody.captcha.secondOperand,
         honeypot: ""
       })
     });

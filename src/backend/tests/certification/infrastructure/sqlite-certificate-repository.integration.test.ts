@@ -35,7 +35,7 @@ describe("SqliteCertificateRepository", () => {
   it("saves and retrieves certificate", async () => {
     const certificate = CertificateFactory.create(
       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      Content.fromText("repo-test"),
+      Content.fromFile(new TextEncoder().encode("repo-test"), "text/plain", "repo-test.txt"),
       new Date("2026-03-18T11:00:00.000Z"),
       {
         chainIndex: 0,

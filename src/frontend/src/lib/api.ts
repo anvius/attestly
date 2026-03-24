@@ -23,12 +23,20 @@ export type PublicConfigDto = {
   ui: {
     hackathonBanner: string;
   };
+  owner: {
+    legalName: string;
+    tin: string;
+    address: string;
+    contactEmail: string;
+    url: string;
+  };
 };
 
 export type ContactConfigDto = {
   captcha: {
     firstOperand: number;
     secondOperand: number;
+    token?: string;
   };
 };
 
@@ -89,6 +97,7 @@ export async function sendContactMessage(input: {
   email: string;
   message: string;
   captchaAnswer: number;
+  captchaToken?: string;
   honeypot: string;
 }): Promise<ContactResponseDto> {
   const response = await fetch(`${API_BASE_URL}/api/contact`, {

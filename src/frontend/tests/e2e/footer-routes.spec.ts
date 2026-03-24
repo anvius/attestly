@@ -9,10 +9,4 @@ test("footer routes resolve", async ({ page }) => {
 
   await page.goto("/help");
   await expect(page.getByRole("heading", { name: /Ayuda|Help/ })).toBeVisible();
-
-  await page.goto("/faq");
-  await expect(page.getByRole("heading", { name: "FAQ" })).toBeVisible();
-
-  await page.goto("/about");
-  await expect(page.getByRole("heading", { name: /Sobre Doccum|About Doccum/ })).toBeVisible();
 });

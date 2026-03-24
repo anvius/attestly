@@ -4,13 +4,11 @@ export type ContactRequest = {
   name: string;
   email: string;
   message: string;
-  captchaAnswer: number;
   honeypot?: string | null;
 };
 
 export class ContactRequestUseCase {
   constructor(
-    private readonly expectedCaptchaAnswer: number,
     private readonly contactMessageSender: ContactMessageSender,
     private readonly defaultSubject: string
   ) {}
@@ -32,12 +30,8 @@ export class ContactRequestUseCase {
       throw new Error("Email is invalid");
     }
 
-    if (message.length < 10) {
+    if (message.length < 20) {
       throw new Error("Message is too short");
-    }
-
-    if (request.captchaAnswer !== this.expectedCaptchaAnswer) {
-      throw new Error("Captcha answer is invalid");
     }
 
     await this.contactMessageSender.send({

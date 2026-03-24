@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import type { CertifyContentUseCase } from "../../application/certify-content-use-case";
 import { Content } from "../../domain/content";
 
@@ -46,31 +47,37 @@ function mapCertificateToDto(certificate: {
 export function buildCertifyController({ certifyContentUseCase, maxUploadBytes = 25 * 1024 * 1024 }: Dependencies): Hono {
   const router = new Hono();
 
-  router.post("/certify", async (c) => {
-    const body = await c.req.parseBody();
-    const file = body.file;
-
-    try {
-      if (!(file instanceof File)) {
-        return c.json({ error: "A single file must be provided" }, 400);
+  router.post(
+    "/certify",
+    bodyLimit({
+      maxSize: maxUploadBytes,
+      onError: (c) => {
+        return c.json({ error: `Payload size exceeds limit of ${maxUploadBytes} bytes` }, 413);
       }
+    }),
+    async (c) => {
+      try {
+        const body = await c.req.parseBody();
+        const file = body.file;
 
-      if (file.size > maxUploadBytes) {
-        return c.json({ error: `File size exceeds limit of ${maxUploadBytes} bytes` }, 400);
+        if (!(file instanceof File)) {
+          return c.json({ error: "A single file must be provided" }, 400);
+        }
+
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        const content = Content.fromFile(bytes, file.type || "application/octet-stream", file.name || null);
+
+        const certificate = await certifyContentUseCase.execute({ content, timestamp: new Date() });
+        return c.json(mapCertificateToDto(certificate), 201);
+      } catch (error) {
+        return c.json(
+          { error: error instanceof Error ? error.message : "Failed to certify content" },
+          400
+        );
       }
-
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const content = Content.fromFile(bytes, file.type || "application/octet-stream", file.name || null);
-
-      const certificate = await certifyContentUseCase.execute({ content, timestamp: new Date() });
-      return c.json(mapCertificateToDto(certificate), 201);
-    } catch (error) {
-      return c.json(
-        { error: error instanceof Error ? error.message : "Failed to certify content" },
-        400
-      );
     }
-  });
+  );
 
   return router;
 }
+

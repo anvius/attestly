@@ -1,10 +1,12 @@
 import { derived, writable } from "svelte/store";
+import type { PublicConfigDto } from "./api";
 import type { Language } from "./i18n";
 
 export type ThemePreference = "system" | "light" | "dark";
 
 export const language = writable<Language>("es");
 export const themePreference = writable<ThemePreference>("system");
+export const ownerData = writable<PublicConfigDto["owner"] | null>(null);
 const systemDark = writable(false);
 
 export const resolvedTheme = derived([themePreference, systemDark], ([$themePreference, $systemDark]) => {

@@ -13,31 +13,15 @@ class FakeMessageSender implements ContactMessageSender {
 describe("ContactRequestUseCase", () => {
   it("sends an email for valid contact payload", async () => {
     const messageSender = new FakeMessageSender();
-    const useCase = new ContactRequestUseCase(12, messageSender, "Contacto desde DocCum");
+    const useCase = new ContactRequestUseCase(messageSender, "Contacto desde DOCCUM");
 
     await useCase.execute({
       name: "Ada Lovelace",
       email: "ada@example.com",
       message: "Necesito soporte con una certificacion.",
-      captchaAnswer: 12,
       honeypot: ""
     });
 
     expect(messageSender.sentMessages.length).toBe(1);
-    expect(messageSender.sentMessages[0]?.subject).toBe("Contacto desde DocCum");
-  });
-
-  it("rejects wrong captcha answer", async () => {
-    const useCase = new ContactRequestUseCase(12, new FakeMessageSender(), "Contacto desde DocCum");
-
-    await expect(
-      useCase.execute({
-        name: "Ada",
-        email: "ada@example.com",
-        message: "Mensaje suficientemente largo",
-        captchaAnswer: 10,
-        honeypot: ""
-      })
-    ).rejects.toThrow("Captcha answer is invalid");
-  });
-});
+    expect(messageSender.sentMessages[0]?.subject).toBe("Contacto desde DOCCUM");
+  });});

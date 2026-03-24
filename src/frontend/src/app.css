@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -55,7 +54,7 @@ body {
   margin: 0;
   color: var(--text);
   background: var(--bg);
-  font-family: "Manrope", sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 * {
@@ -71,7 +70,7 @@ h1,
 h2,
 h3 {
   margin: 0;
-  font-family: "Sora", sans-serif;
+  font-family: "Outfit", sans-serif;
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
@@ -168,9 +167,15 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: "Sora", sans-serif;
+  font-family: "Outfit", sans-serif;
   font-weight: 800;
   letter-spacing: 0.04em;
+}
+
+.brand-seal {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
 }
 
 .brand-mark {
@@ -261,10 +266,13 @@ p {
 .btn-solid {
   background: var(--primary);
   color: var(--primary-text);
+  box-shadow: 0 4px 14px 0 color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 .btn-solid:hover {
   background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .btn-outline {
@@ -291,13 +299,19 @@ p {
 
 .hero-wrap {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 26px;
-  align-items: start;
+  grid-template-columns: 1fr;
+  gap: 44px;
+  align-items: center;
+  max-width: 860px;
+  margin: 0 auto;
 }
 
 .hero-copy {
   padding: 30px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .hero-copy .eyebrow {
@@ -321,6 +335,7 @@ p {
   max-width: 62ch;
   font-size: 20px;
   line-height: 1.5;
+  margin: 0 auto;
 }
 
 .hint-strong {
@@ -363,6 +378,33 @@ p {
 .upload-card-dragging {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.global-dropzone {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px dashed var(--accent);
+  margin: 12px;
+  border-radius: 20px;
+}
+
+.global-dropzone-content {
+  background: var(--surface);
+  padding: 30px 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  text-align: center;
+  pointer-events: none;
+}
+.global-dropzone-content h2 {
+  font-size: 28px;
+  color: var(--accent);
 }
 
 .hint {
@@ -548,8 +590,9 @@ p {
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.1fr repeat(3, 0.7fr);
+  grid-template-columns: 1.4fr 1fr 1fr;
   gap: 22px;
+  align-items: start;
 }
 
 .footer-grid h3,
@@ -587,17 +630,37 @@ p {
   gap: 16px;
 }
 
-.footer-social a {
-  border: 1px solid var(--border);
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--surface-soft);
+.footer-bottom-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
+.footer-bottom-text a {
+  color: var(--muted);
+}
+
+.footer-bottom-text .made-with-love {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.footer-bottom-text .made-with-love a {
+  text-decoration: underline;
+}
+
+.footer-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.footer-social a,
 .footer-icon-btn {
   border: 1px solid var(--border);
   width: 38px;
@@ -608,6 +671,13 @@ p {
   justify-content: center;
   background: var(--surface-soft);
   color: var(--text);
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms;
+}
+
+.footer-social a:hover,
+.footer-icon-btn:hover {
+  background: var(--border);
 }
 
 .footer-social svg {
@@ -655,7 +725,31 @@ p {
   }
 
   .site-header-inner {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
     padding: 12px 14px;
+  }
+  .header-icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 9999px;
+  }
+  .header-icon-btn:hover {
+    color: var(--primary);
+    background: var(--bg-hover);
+  }
+  .lang-button span:nth-child(2) {
+    display: none;
+  }
+  .btn-outline.header-contact {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
   }
 
   .top-banner-inner {

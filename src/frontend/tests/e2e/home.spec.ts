@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test("full certification flow from file", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("a.brand")).toBeVisible();
+  await expect(page.locator(".site-header a.brand")).toBeVisible();
 
   const evidenceFile = {
     name: "e2e-evidence.txt",

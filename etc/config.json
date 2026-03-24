@@ -3,7 +3,7 @@
     "maxUploadBytes": 26214400
   },
   "contact": {
-    "defaultSubject": "Contacto desde DocCum",
+    "defaultSubject": "Contacto desde DOCCUM",
     "smtp": {
       "host": "smtp.example.com",
       "port": 587,
@@ -20,5 +20,12 @@
   },
   "ui": {
     "hackathonBanner": "Hackathon build · producto experimental en evolución"
+  },
+  "owner": {
+    "legalName": "Simplicer OpenSource Contributor",
+    "tin": "B00000000",
+    "address": "Hackathon St, Open Source Hub, 28000 Madrid",
+    "contactEmail": "hello@midudev.hackathon.example",
+    "url": "https://github.com/midudev/hackaton-cubepath-2026"
   }
 }
