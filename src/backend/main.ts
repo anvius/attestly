@@ -1,6 +1,6 @@
-import { createServerApp } from "./shared/http/server";
+import { createApp } from "./shared/create-app";
 
-const app = createServerApp();
+const app = createApp();
 
 const port = Number(process.env.PORT ?? 3000);
 
