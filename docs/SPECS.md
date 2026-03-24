@@ -27,3 +27,13 @@ Provide a simple and trustworthy way to certify digital content existence withou
 - Hash algorithm is SHA256 only.
 - SQLite for MVP persistence.
 - Public read access through unique URL.
+
+## Implementation Status
+
+- Completed:
+	- `Content` Value Object for `TEXT` and `FILE` payloads with validation rules.
+	- `HashCalculatorService` domain service for deterministic SHA256 calculation.
+	- `Certificate` aggregate root with SHA256 invariant and immutable state.
+	- `CertificateFactory` domain service to build certificates from content metadata and server timestamp.
+	- Application ports: `CertificateRepository` and `HashProvider`.
+	- Application use cases: `CertifyContentUseCase` and `GetCertificateUseCase`.

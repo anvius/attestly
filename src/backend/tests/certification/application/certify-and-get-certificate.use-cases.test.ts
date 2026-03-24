@@ -1,0 +1,57 @@
+import { describe, expect, it } from "bun:test";
+import { Content } from "../../../certification/domain/content";
+import { Certificate } from "../../../certification/domain/certificate";
+import type { CertificateRepository } from "../../../certification/application/interfaces/certificate-repository";
+import type { HashProvider } from "../../../certification/application/interfaces/hash-provider";
+import { CertifyContentUseCase } from "../../../certification/application/certify-content-use-case";
+import { GetCertificateUseCase } from "../../../certification/application/get-certificate-use-case";
+
+class InMemoryCertificateRepository implements CertificateRepository {
+  private readonly records = new Map<string, Certificate>();
+
+  async save(certificate: Certificate): Promise<void> {
+    this.records.set(certificate.id, certificate);
+  }
+
+  async findById(id: string): Promise<Certificate | null> {
+    return this.records.get(id) ?? null;
+  }
+}
+
+class FakeHashProvider implements HashProvider {
+  async calculateHash(content: Content): Promise<string> {
+    const raw = content.asString();
+    if (raw === "a") {
+      return "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    }
+    return "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+  }
+}
+
+describe("CertifyContentUseCase", () => {
+  it("creates and persists a certificate", async () => {
+    const repository = new InMemoryCertificateRepository();
+    const hashProvider = new FakeHashProvider();
+    const useCase = new CertifyContentUseCase(repository, hashProvider);
+
+    const certificate = await useCase.execute({
+      content: Content.fromText("a"),
+      timestamp: new Date("2026-03-18T10:00:00.000Z")
+    });
+
+    expect(certificate.hash).toBe("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    expect(certificate.timestamp.toISOString()).toBe("2026-03-18T10:00:00.000Z");
+
+    const fromRepo = await repository.findById(certificate.id);
+    expect(fromRepo?.id).toBe(certificate.id);
+  });
+});
+
+describe("GetCertificateUseCase", () => {
+  it("returns null for unknown id", async () => {
+    const useCase = new GetCertificateUseCase(new InMemoryCertificateRepository());
+    const result = await useCase.execute({ id: "missing" });
+
+    expect(result).toBeNull();
+  });
+});
