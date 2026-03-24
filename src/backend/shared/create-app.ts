@@ -12,6 +12,7 @@ import type { ContactNotifier } from "../contact/domain/contact-notifier";
 import { createContactEndpoints } from "../contact/infrastructure/contact-http";
 import { SmtpContactNotifier } from "../contact/infrastructure/smtp-contact-notifier";
 import { loadConfig } from "./load-config";
+import { logger } from "./logger";
 
 export function createApp(): Hono {
   const app = new Hono();
@@ -37,6 +38,25 @@ export function createApp(): Hono {
   );
 
   app.use("/api/*", cors());
+
+  app.use("*", async (c, next) => {
+    try {
+      await next();
+      const status = c.res.status;
+      if (status >= 500) {
+        logger.error("server_error", { method: c.req.method, path: c.req.path, status });
+      } else if (status >= 400) {
+        logger.warn("client_error", { method: c.req.method, path: c.req.path, status });
+      }
+    } catch (err) {
+      logger.error("unhandled_error", {
+        method: c.req.method,
+        path: c.req.path,
+        error: err instanceof Error ? err.message : String(err)
+      });
+      throw err;
+    }
+  });
 
   app.get("/health", (c) => c.json({ status: "ok", service: "doccum-backend" }));
   app.get("/api/public-config", (c) =>
