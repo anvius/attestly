@@ -7,6 +7,43 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.3.2] — 2026-03-24
+
+### Fixed
+
+- **Banner**: hackathon message shown immediately on load (no API dependency); easter eggs rotate only on hover — fixes invisible banner on slow connections.
+- **Deploy**: move `VITE_API_BASE_URL` from runtime `environment` to `build.args` in `compose.dokploy.yaml`; SvelteKit requires it at compile time.
+
+## [1.3.1] — 2026-03-24
+
+### Fixed
+
+- **Banner**: hackathon message shown immediately on load (no API dependency); easter eggs rotate only on hover.
+
+## [1.3.0] — 2026-03-24
+
+### Added
+
+- **Social sharing**: share certificate proof via X/Twitter, LinkedIn, and native Web Share API from the certificate page.
+
+## [1.2.0] — 2026-03-24
+
+### Added
+
+- **Structured logging**: Loki-compatible JSON-lines file (`var/log/app.jsonl`); Hono middleware records 4xx warnings and 5xx errors with method, path, and status.
+
+## [1.1.0] — 2026-03-24
+
+### Added
+
+- **Easter egg banner**: top banner rotates 4 developer in-jokes on hover; fade-in animation; responsive breakpoints refined.
+
+### Changed
+
+- **Container naming**: `Dockerfile.*` → `Containerfile.*`, `docker-compose.yml` → `compose.yaml`, `infra/docker/` → `infra/containers/` (OCI/Podman standard).
+
+---
+
 ## [1.0.0] — 2026-03-24
 
 First public release. Submitted to [CubePath 2026 Hackathon](https://github.com/midudev/hackaton-cubepath-2026) by [@anvius](https://anvius.com).
@@ -42,4 +79,9 @@ infra/
 
 ---
 
+[1.3.2]: https://github.com/anvius/hackaton-midudev-2026/compare/v1.0.0...v1.3.2
+[1.3.1]: https://github.com/anvius/hackaton-midudev-2026/compare/v1.0.0...v1.3.1
+[1.3.0]: https://github.com/anvius/hackaton-midudev-2026/compare/v1.0.0...v1.3.0
+[1.2.0]: https://github.com/anvius/hackaton-midudev-2026/compare/v1.0.0...v1.2.0
+[1.1.0]: https://github.com/anvius/hackaton-midudev-2026/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/anvius/hackaton-midudev-2026/releases/tag/v1.0.0
