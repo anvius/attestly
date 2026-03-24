@@ -4,7 +4,7 @@ import svelte from "eslint-plugin-svelte";
 
 export default [
   {
-    ignores: [".svelte-kit/**", "build/**", "dist/**", "node_modules/**", "*.cjs"]
+    ignores: [".svelte-kit/**", "build/**", "dist/**", "node_modules/**", "*.cjs", "**/*.svelte"]
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

@@ -7,6 +7,7 @@
 :root {
   --bg-1: #081016;
   --bg-2: #101826;
+  --bg-3: #1a2a3a;
   --card: rgba(11, 17, 23, 0.72);
   --text: #e8eef5;
   --muted: #9db0c3;
@@ -24,7 +25,7 @@ body {
   font-family: "Space Grotesk", sans-serif;
   background:
     radial-gradient(1200px 800px at 10% -10%, #173046 0%, transparent 50%),
-    radial-gradient(1000px 700px at 110% 0%, #0f2940 0%, transparent 50%),
+    radial-gradient(1000px 700px at 110% 0%, var(--bg-3) 0%, transparent 50%),
     linear-gradient(160deg, var(--bg-1), var(--bg-2));
 }
 
@@ -37,3 +38,32 @@ body {
   backdrop-filter: blur(12px);
   border: 1px solid rgba(157, 176, 195, 0.2);
 }
+
+.fade-in {
+  animation: fade-in 450ms ease-out both;
+}
+
+.rise {
+  animation: rise 520ms ease-out both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
