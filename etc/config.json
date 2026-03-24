@@ -5,13 +5,13 @@
   "contact": {
     "defaultSubject": "Contacto desde DOCCUM",
     "smtp": {
-      "host": "smtp.example.com",
+      "host": "smtp.your-provider.example",
       "port": 587,
       "secure": false,
-      "username": "doccum-bot@example.com",
-      "password": "change-me",
-      "fromEmail": "doccum-bot@example.com",
-      "toEmail": "contacto@doccum.example"
+      "username": "no-reply@your-domain.example",
+      "password": "SET_SMTP_PASSWORD_HERE",
+      "fromEmail": "no-reply@your-domain.example",
+      "toEmail": "inbox@your-domain.example"
     },
     "captcha": {
       "firstOperand": 7,
