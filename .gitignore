@@ -8,5 +8,12 @@ coverage/
 .env.*
 !.env.example
 src/backend/doccum.db
+src/backend/doccum.db-shm
+src/backend/doccum.db-wal
 src/frontend/test-results/
 var/log/*.jsonl
+# AI tooling (not part of the project)
+AGENTS.md
+.agents/
+.claude/
+.playwright-mcp/
