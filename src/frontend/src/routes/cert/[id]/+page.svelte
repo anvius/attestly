@@ -53,6 +53,27 @@
     copiedUrl = true;
     setTimeout(() => (copiedUrl = false), 1200);
   }
+
+  function shareTwitter(): void {
+    const text = encodeURIComponent(t.certShareText.replace("{brand}", "DOCCUM"));
+    const url = encodeURIComponent(certUrl);
+    window.open(`https://x.com/intent/tweet?text=${text}&url=${url}`, "_blank", "noopener");
+  }
+
+  function shareLinkedIn(): void {
+    const url = encodeURIComponent(certUrl);
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, "_blank", "noopener");
+  }
+
+  async function shareNative(): Promise<void> {
+    if (navigator.share) {
+      await navigator.share({
+        title: t.certTitle,
+        text: t.certShareText.replace("{brand}", "DOCCUM"),
+        url: certUrl
+      });
+    }
+  }
 </script>
 
 <svelte:head>
@@ -116,6 +137,21 @@
           <button aria-live="polite" class="btn-secondary rounded-xl px-4 py-2 text-sm" on:click={copyUrl}>
             {copiedUrl ? t.certCopied : t.certCopyUrl}
           </button>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <span class="txt-muted self-center text-xs">{t.certShare}:</span>
+          <button class="btn-secondary rounded-xl px-3 py-2 text-xs" on:click={shareTwitter} aria-label="Share on X/Twitter">
+            𝕏
+          </button>
+          <button class="btn-secondary rounded-xl px-3 py-2 text-xs" on:click={shareLinkedIn} aria-label="Share on LinkedIn">
+            in
+          </button>
+          {#if typeof navigator !== "undefined" && "share" in navigator}
+            <button class="btn-secondary rounded-xl px-3 py-2 text-xs" on:click={shareNative} aria-label="Share">
+              ↗
+            </button>
+          {/if}
         </div>
       </dl>
 
