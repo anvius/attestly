@@ -7,4 +7,5 @@ coverage/
 .env
 .env.*
 src/backend/doccum.db
+src/frontend/test-results/
 var/log/*.jsonl

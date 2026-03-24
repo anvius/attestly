@@ -37,3 +37,6 @@ Provide a simple and trustworthy way to certify digital content existence withou
 	- `CertificateFactory` domain service to build certificates from content metadata and server timestamp.
 	- Application ports: `CertificateRepository` and `HashProvider`.
 	- Application use cases: `CertifyContentUseCase` and `GetCertificateUseCase`.
+	- Infrastructure adapters: SQLite repository, Node crypto hash provider, HTTP controllers.
+	- Acceptance API flow: certify text and fetch certificate by id.
+	- Frontend UX flow: drag/drop or text input, certificate route, QR and copy actions.
