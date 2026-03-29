@@ -2,18 +2,18 @@ import { describe, expect, it } from "bun:test";
 import { Hono } from "hono";
 import { CertificateFactory } from "../../../certification/domain/services/certificate-factory";
 import { Content } from "../../../certification/domain/content";
-import { buildCertifyController } from "../../../certification/infrastructure/controllers/certify-controller";
-import { buildGetCertificateController } from "../../../certification/infrastructure/controllers/get-certificate-controller";
-import { buildVerifyController } from "../../../certification/infrastructure/controllers/verify-controller";
-import { buildCountController } from "../../../certification/infrastructure/controllers/count-controller";
-import { buildCertifyTextController } from "../../../certification/infrastructure/controllers/certify-text-controller";
+import { buildCertifyFileEndpoint } from "../../../certification/infrastructure/http/certify-file-endpoint";
+import { buildGetCertificateEndpoint } from "../../../certification/infrastructure/http/get-certificate-endpoint";
+import { buildVerifyFileEndpoint } from "../../../certification/infrastructure/http/verify-file-endpoint";
+import { buildCountCertificatesEndpoint } from "../../../certification/infrastructure/http/count-certificates-endpoint";
+import { buildCertifyTextEndpoint } from "../../../certification/infrastructure/http/certify-text-endpoint";
 
 describe("Controllers", () => {
   it("certify controller returns 201", async () => {
     const app = new Hono();
     app.route(
       "/api",
-      buildCertifyController({
+      buildCertifyFileEndpoint({
         certifyContentUseCase: {
           execute: async () =>
             CertificateFactory.create(
@@ -54,7 +54,7 @@ describe("Controllers", () => {
     const app = new Hono();
     app.route(
       "/api",
-      buildGetCertificateController({
+      buildGetCertificateEndpoint({
         getCertificateUseCase: {
           execute: async () => null
         } as never
@@ -69,7 +69,7 @@ describe("Controllers", () => {
     const app = new Hono();
     app.route(
       "/api",
-      buildVerifyController({
+      buildVerifyFileEndpoint({
         verifyHashUseCase: {
           execute: async () => null
         } as never,
@@ -101,7 +101,7 @@ describe("Controllers", () => {
     const app = new Hono();
     app.route(
       "/api",
-      buildCountController({
+      buildCountCertificatesEndpoint({
         countCertificatesUseCase: {
           execute: async () => 7
         } as never,
@@ -136,7 +136,7 @@ describe("Controllers", () => {
     const app = new Hono();
     app.route(
       "/api",
-      buildCertifyTextController({
+      buildCertifyTextEndpoint({
         certifyContentUseCase: {
           execute: async () => fakeCert
         } as never
@@ -158,7 +158,7 @@ describe("Controllers", () => {
     const app = new Hono();
     app.route(
       "/api",
-      buildCertifyTextController({
+      buildCertifyTextEndpoint({
         certifyContentUseCase: {
           execute: async () => null
         } as never
@@ -178,7 +178,7 @@ describe("Controllers", () => {
     const app = new Hono();
     app.route(
       "/api",
-      buildCountController({
+      buildCountCertificatesEndpoint({
         countCertificatesUseCase: {
           execute: async () => 0
         } as never,

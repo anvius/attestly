@@ -9,7 +9,7 @@ type Dependencies = {
   maxUploadBytes?: number;
 };
 
-export function buildVerifyController({
+export function buildVerifyFileEndpoint({
   verifyHashUseCase,
   hashProvider,
   maxUploadBytes = 25 * 1024 * 1024

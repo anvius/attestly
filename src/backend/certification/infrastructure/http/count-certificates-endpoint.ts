@@ -7,7 +7,7 @@ type Dependencies = {
   certificateRepository: CertificateRepository;
 };
 
-export function buildCountController({ countCertificatesUseCase, certificateRepository }: Dependencies): Hono {
+export function buildCountCertificatesEndpoint({ countCertificatesUseCase, certificateRepository }: Dependencies): Hono {
   const router = new Hono();
 
   router.get("/certificates/count", async (c) => {

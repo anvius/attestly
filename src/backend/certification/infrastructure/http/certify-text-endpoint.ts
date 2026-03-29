@@ -6,7 +6,7 @@ type Dependencies = {
   certifyContentUseCase: CertifyContentUseCase;
 };
 
-export function buildCertifyTextController({ certifyContentUseCase }: Dependencies): Hono {
+export function buildCertifyTextEndpoint({ certifyContentUseCase }: Dependencies): Hono {
   const router = new Hono();
 
   router.post("/certify-text", async (c) => {

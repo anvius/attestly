@@ -1,9 +1,9 @@
 import { Hono } from "hono";
-import type { CertifyContent } from "../application/certify-content";
-import { Content } from "../domain/content";
+import type { CertifyContentUseCase } from "../../application/certify-content-use-case";
+import { Content } from "../../domain/content";
 
 type Dependencies = {
-  certifyContent: CertifyContent;
+  certifyContentUseCase: CertifyContentUseCase;
   maxUploadBytes?: number;
 };
 
@@ -43,7 +43,7 @@ function mapCertificateToDto(certificate: {
   };
 }
 
-export function createCertifyContentEndpoint({ certifyContent, maxUploadBytes = 25 * 1024 * 1024 }: Dependencies): Hono {
+export function buildCertifyFileEndpoint({ certifyContentUseCase, maxUploadBytes = 25 * 1024 * 1024 }: Dependencies): Hono {
   const router = new Hono();
 
   router.post("/certify", async (c) => {
@@ -62,13 +62,12 @@ export function createCertifyContentEndpoint({ certifyContent, maxUploadBytes = 
       const bytes = new Uint8Array(await file.arrayBuffer());
       const content = Content.fromFile(bytes, file.type || "application/octet-stream", file.name || null);
 
-      const certificate = await certifyContent.execute({ content, timestamp: new Date() });
-
+      const certificate = await certifyContentUseCase.execute({ content, timestamp: new Date() });
       return c.json(mapCertificateToDto(certificate), 201);
     } catch (error) {
       return c.json(
-        { error: error instanceof Error ? error.message : "Certification failed" },
-        500
+        { error: error instanceof Error ? error.message : "Failed to certify content" },
+        400
       );
     }
   });

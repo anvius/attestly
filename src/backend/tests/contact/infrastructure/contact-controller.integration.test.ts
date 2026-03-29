@@ -1,13 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import { Hono } from "hono";
-import { buildContactController } from "../../../contact/infrastructure/controllers/contact-controller";
+import { buildSendContactEndpoint } from "../../../contact/infrastructure/http/send-contact-endpoint";
 
 describe("Contact controller", () => {
   it("returns random captcha config", async () => {
     const app = new Hono();
     app.route(
       "/api",
-      buildContactController({
+      buildSendContactEndpoint({
         contactRequestUseCase: {
           execute: async () => undefined
         } as never
@@ -27,7 +27,7 @@ describe("Contact controller", () => {
 
   it("accepts valid contact request", async () => {
     const app = new Hono();
-    const controller = buildContactController({
+    const controller = buildSendContactEndpoint({
       contactRequestUseCase: {
         execute: async () => undefined
       } as never

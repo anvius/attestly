@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "bun:test";
 import { Database } from "bun:sqlite";
 import { Content } from "../../../certification/domain/content";
 import { CertificateFactory } from "../../../certification/domain/services/certificate-factory";
-import { SqliteCertificateRepository } from "../../../certification/infrastructure/repositories/sqlite-certificate-repository";
+import { SqliteCertificateRepository } from "../../../certification/infrastructure/persistence/sqlite-certificate-repository";
 
 describe("SqliteCertificateRepository", () => {
   let db: Database;

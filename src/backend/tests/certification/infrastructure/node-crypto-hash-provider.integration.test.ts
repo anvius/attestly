@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { Content } from "../../../certification/domain/content";
-import { NodeCryptoHashProvider } from "../../../certification/infrastructure/providers/node-crypto-hash-provider";
+import { NodeCryptoHashProvider } from "../../../certification/infrastructure/hashing/node-crypto-hash-provider";
 
 describe("NodeCryptoHashProvider", () => {
   it("calculates correct SHA256 hash", async () => {

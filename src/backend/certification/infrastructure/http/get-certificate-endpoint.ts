@@ -5,7 +5,7 @@ type Dependencies = {
   getCertificateUseCase: GetCertificateUseCase;
 };
 
-export function buildGetCertificateController({ getCertificateUseCase }: Dependencies): Hono {
+export function buildGetCertificateEndpoint({ getCertificateUseCase }: Dependencies): Hono {
   const router = new Hono();
 
   router.get("/cert/:id", async (c) => {

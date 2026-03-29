@@ -4,18 +4,18 @@ import { CertifyContentUseCase } from "../../certification/application/certify-c
 import { CountCertificatesUseCase } from "../../certification/application/count-certificates-use-case";
 import { GetCertificateUseCase } from "../../certification/application/get-certificate-use-case";
 import { VerifyHashUseCase } from "../../certification/application/verify-hash-use-case";
-import { buildCertifyController } from "../../certification/infrastructure/controllers/certify-controller";
-import { buildCertifyTextController } from "../../certification/infrastructure/controllers/certify-text-controller";
-import { buildCountController } from "../../certification/infrastructure/controllers/count-controller";
-import { buildGetCertificateController } from "../../certification/infrastructure/controllers/get-certificate-controller";
-import { buildVerifyController } from "../../certification/infrastructure/controllers/verify-controller";
-import { CubepathTimeEvidenceProvider } from "../../certification/infrastructure/providers/cubepath-time-evidence-provider";
-import { NodeCryptoHashProvider } from "../../certification/infrastructure/providers/node-crypto-hash-provider";
-import { SqliteCertificateRepository } from "../../certification/infrastructure/repositories/sqlite-certificate-repository";
+import { buildCertifyFileEndpoint } from "../../certification/infrastructure/http/certify-file-endpoint";
+import { buildCertifyTextEndpoint } from "../../certification/infrastructure/http/certify-text-endpoint";
+import { buildCountCertificatesEndpoint } from "../../certification/infrastructure/http/count-certificates-endpoint";
+import { buildGetCertificateEndpoint } from "../../certification/infrastructure/http/get-certificate-endpoint";
+import { buildVerifyFileEndpoint } from "../../certification/infrastructure/http/verify-file-endpoint";
+import { CubepathTimeEvidenceProvider } from "../../certification/infrastructure/evidence/cubepath-time-evidence-provider";
+import { NodeCryptoHashProvider } from "../../certification/infrastructure/hashing/node-crypto-hash-provider";
+import { SqliteCertificateRepository } from "../../certification/infrastructure/persistence/sqlite-certificate-repository";
 import { ContactRequestUseCase } from "../../contact/application/contact-request.use-case";
 import type { ContactMessageSender } from "../../contact/application/interfaces/contact-message-sender";
-import { buildContactController } from "../../contact/infrastructure/controllers/contact-controller";
-import { SmtpContactMessageSender } from "../../contact/infrastructure/providers/smtp-contact-message-sender";
+import { buildSendContactEndpoint } from "../../contact/infrastructure/http/send-contact-endpoint";
+import { SmtpContactMessageSender } from "../../contact/infrastructure/email/smtp-contact-message-sender";
 import { loadAppConfig } from "../config/app-config";
 
 export function createServerApp(): Hono {
@@ -59,25 +59,25 @@ export function createServerApp(): Hono {
   );
   app.route(
     "/api",
-    buildCertifyController({
+    buildCertifyFileEndpoint({
       certifyContentUseCase,
       maxUploadBytes: appConfig.certification.maxUploadBytes
     })
   );
-  app.route("/api", buildGetCertificateController({ getCertificateUseCase }));
+  app.route("/api", buildGetCertificateEndpoint({ getCertificateUseCase }));
   app.route(
     "/api",
-    buildVerifyController({
+    buildVerifyFileEndpoint({
       verifyHashUseCase,
       hashProvider,
       maxUploadBytes: appConfig.certification.maxUploadBytes
     })
   );
-  app.route("/api", buildCountController({ countCertificatesUseCase, certificateRepository }));
-  app.route("/api", buildCertifyTextController({ certifyContentUseCase }));
+  app.route("/api", buildCountCertificatesEndpoint({ countCertificatesUseCase, certificateRepository }));
+  app.route("/api", buildCertifyTextEndpoint({ certifyContentUseCase }));
   app.route(
     "/api",
-    buildContactController({
+    buildSendContactEndpoint({
       contactRequestUseCase
     })
   );

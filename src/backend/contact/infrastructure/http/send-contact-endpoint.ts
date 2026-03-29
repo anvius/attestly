@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { createHmac } from "node:crypto";
-import type { SendContactRequest } from "../application/send-contact-request";
+import type { ContactRequestUseCase } from "../../application/contact-request.use-case";
 
 // La clave de firma se genera por proceso (cambia en cada reinicio)
 // Para producción, leer de variable de entorno
@@ -18,12 +18,13 @@ function signCaptcha(sum: number, timestamp: number): string {
 }
 
 type Dependencies = {
-  sendContactRequest: SendContactRequest;
+  contactRequestUseCase: ContactRequestUseCase;
 };
 
-export function createContactEndpoints(dependencies: Dependencies): Hono {
+export function buildSendContactEndpoint(dependencies: Dependencies): Hono {
   const router = new Hono();
 
+  // Devuelve operandos aleatorios + un token HMAC que el cliente reenvía en el POST
   router.get("/contact/config", (c) => {
     const a = randomOperand();
     const b = randomOperand();
@@ -44,6 +45,7 @@ export function createContactEndpoints(dependencies: Dependencies): Hono {
     const payload = await c.req.json();
 
     try {
+      // Validar el token HMAC del captcha
       const rawToken = String(payload?.captchaToken ?? "");
       const parts = rawToken.split(":");
       const ts = Number(parts[0]);
@@ -51,13 +53,13 @@ export function createContactEndpoints(dependencies: Dependencies): Hono {
       const captchaAnswer = Number(payload?.captchaAnswer);
 
       const expectedSig = signCaptcha(captchaAnswer, ts);
-      const isTokenValid = sig === expectedSig && Date.now() - ts < 30 * 60 * 1000;
+      const isTokenValid = sig === expectedSig && Date.now() - ts < 30 * 60 * 1000; // 30 min
 
       if (!isTokenValid) {
         return c.json({ error: "Captcha inválido" }, 400);
       }
 
-      await dependencies.sendContactRequest.execute({
+      await dependencies.contactRequestUseCase.execute({
         name: String(payload?.name ?? ""),
         email: String(payload?.email ?? ""),
         message: String(payload?.message ?? ""),
