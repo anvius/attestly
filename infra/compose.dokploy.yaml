@@ -3,10 +3,15 @@
 # Dokploy clones the repo and runs `docker compose build` on the server
 # — no registry needed, images are built from source.
 #
-# Required env vars in Dokploy project settings:
-#   GOATCOUNTER_EMAIL, GOATCOUNTER_PASSWORD
+# Required env vars in Dokploy project settings (Environment tab):
+#   CAPTCHA_SECRET      — run: openssl rand -hex 32
+#   SMTP_USERNAME       — e.g. doccum@lexemas.com
+#   SMTP_PASSWORD       — SMTP password
+#   GOATCOUNTER_EMAIL   — analytics admin email
+#   GOATCOUNTER_PASSWORD — analytics admin password
 #
-# Replace doccum.com / api.doccum.com / stats.doccum.com with your domain.
+# Traefik entrypoints assumed: web (80), websecure (443) with certresolver=letsencrypt
+# — both are pre-configured by Dokploy.
 
 services:
   doccum-backend:
@@ -16,10 +21,18 @@ services:
     environment:
       - PORT=3000
       - DB_PATH=/data/doccum.db
+      - CAPTCHA_SECRET=${CAPTCHA_SECRET}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
     volumes:
       - doccum-backend-data:/data
     labels:
       - traefik.enable=true
+      # HTTP → HTTPS redirect
+      - traefik.http.routers.doccum-backend-http.rule=Host(`api.doccum.com`)
+      - traefik.http.routers.doccum-backend-http.entrypoints=web
+      - traefik.http.routers.doccum-backend-http.middlewares=https-redirect
+      # HTTPS
       - traefik.http.routers.doccum-backend.rule=Host(`api.doccum.com`)
       - traefik.http.routers.doccum-backend.entrypoints=websecure
       - traefik.http.routers.doccum-backend.tls.certresolver=letsencrypt
@@ -39,6 +52,22 @@ services:
       - doccum-backend
     labels:
       - traefik.enable=true
+      # Middlewares (definidos una sola vez, aquí en el servicio principal)
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+      - traefik.http.middlewares.www-to-nonwww.redirectregex.regex=^https?://www\.doccum\.com(.*)
+      - traefik.http.middlewares.www-to-nonwww.redirectregex.replacement=https://doccum.com$${1}
+      - traefik.http.middlewares.www-to-nonwww.redirectregex.permanent=true
+      # HTTP → HTTPS (doccum.com y www.doccum.com)
+      - traefik.http.routers.doccum-frontend-http.rule=Host(`doccum.com`) || Host(`www.doccum.com`)
+      - traefik.http.routers.doccum-frontend-http.entrypoints=web
+      - traefik.http.routers.doccum-frontend-http.middlewares=https-redirect
+      # HTTPS www → non-www
+      - traefik.http.routers.doccum-frontend-www.rule=Host(`www.doccum.com`)
+      - traefik.http.routers.doccum-frontend-www.entrypoints=websecure
+      - traefik.http.routers.doccum-frontend-www.tls.certresolver=letsencrypt
+      - traefik.http.routers.doccum-frontend-www.middlewares=www-to-nonwww
+      # HTTPS principal
       - traefik.http.routers.doccum-frontend.rule=Host(`doccum.com`)
       - traefik.http.routers.doccum-frontend.entrypoints=websecure
       - traefik.http.routers.doccum-frontend.tls.certresolver=letsencrypt
@@ -56,6 +85,11 @@ services:
       - doccum-analytics-data:/data
     labels:
       - traefik.enable=true
+      # HTTP → HTTPS redirect
+      - traefik.http.routers.doccum-analytics-http.rule=Host(`stats.doccum.com`)
+      - traefik.http.routers.doccum-analytics-http.entrypoints=web
+      - traefik.http.routers.doccum-analytics-http.middlewares=https-redirect
+      # HTTPS
       - traefik.http.routers.doccum-analytics.rule=Host(`stats.doccum.com`)
       - traefik.http.routers.doccum-analytics.entrypoints=websecure
       - traefik.http.routers.doccum-analytics.tls.certresolver=letsencrypt
