@@ -26,6 +26,8 @@ services:
       - SMTP_PASSWORD=${SMTP_PASSWORD}
     volumes:
       - doccum-backend-data:/data
+    networks:
+      - dokploy-network
     labels:
       - traefik.enable=true
       # HTTP → HTTPS redirect
@@ -50,6 +52,8 @@ services:
       - ORIGIN=https://doccum.com
     depends_on:
       - doccum-backend
+    networks:
+      - dokploy-network
     labels:
       - traefik.enable=true
       # Middlewares (definidos una sola vez, aquí en el servicio principal)
@@ -83,6 +87,8 @@ services:
       - GOATCOUNTER_PASSWORD=${GOATCOUNTER_PASSWORD:-changeme}
     volumes:
       - doccum-analytics-data:/data
+    networks:
+      - dokploy-network
     labels:
       - traefik.enable=true
       # HTTP → HTTPS redirect
@@ -98,3 +104,7 @@ services:
 volumes:
   doccum-backend-data:
   doccum-analytics-data:
+
+networks:
+  dokploy-network:
+    external: true
