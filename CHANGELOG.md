@@ -7,6 +7,25 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.5.0] — 2026-03-29
+
+### Added
+
+- **API documentation**: comprehensive `docs/API.md` with all 10 endpoints, cURL examples, and field reference.
+- **Competitor comparison**: bilingual comparison table (Doccum vs digital notary / blockchain / Adobe Sign) on About page.
+- **Chain animation on /process**: `CertAnimation` component now also shown on the process page for visual consistency.
+- **Screenshots**: captured Home, Certificate, Process, and Verify pages in `docs/screenshots/` and linked in README.
+
+### Fixed
+
+- **Nav alignment**: "Verificar" link moved into actions group and styled as an outline button, aligned with language and contact buttons.
+
+### Changed
+
+- **CubePath credit note**: converted to HTML comment in hackathon issue for cleaner public presentation.
+
+---
+
 ## [1.4.0] — 2026-03-24
 
 ### Added

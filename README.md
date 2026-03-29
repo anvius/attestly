@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/anvius/attestly/actions/workflows/ci.yml/badge.svg)](https://github.com/anvius/attestly/actions/workflows/ci.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Version](https://img.shields.io/badge/version-1.3.2-green)](package.json)
+[![Version](https://img.shields.io/badge/version-1.5.0-green)](package.json)
 [![Runtime: Bun](https://img.shields.io/badge/runtime-Bun-f9f1e1?logo=bun)](https://bun.sh)
 [![Frontend: SvelteKit](https://img.shields.io/badge/frontend-SvelteKit-ff3e00?logo=svelte)](https://kit.svelte.dev)
 
