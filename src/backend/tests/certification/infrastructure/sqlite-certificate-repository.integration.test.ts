@@ -58,4 +58,74 @@ describe("SqliteCertificateRepository", () => {
     const latest = await repository.findLatest();
     expect(latest?.id).toBe(certificate.id);
   });
+
+  it("findByHash returns matching certificate", async () => {
+    const hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    const certificate = CertificateFactory.create(
+      hash,
+      Content.fromText("find-by-hash-test"),
+      new Date("2026-03-18T11:00:00.000Z"),
+      {
+        chainIndex: 0,
+        previousCertificateDigest:
+          "0000000000000000000000000000000000000000000000000000000000000000",
+        cubepathUnixTimeCheckedAt: null,
+        cubepathUnixTimeSourceHash: null,
+        cubepathStatusCheckedAt: null,
+        cubepathStatusSourceHash: null
+      }
+    );
+
+    await repository.save(certificate);
+    const found = await repository.findByHash(hash);
+
+    expect(found).not.toBeNull();
+    expect(found?.hash).toBe(hash);
+  });
+
+  it("findByHash returns null for unknown hash", async () => {
+    const found = await repository.findByHash(
+      "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    );
+    expect(found).toBeNull();
+  });
+
+  it("count returns total number of certificates", async () => {
+    expect(await repository.count()).toBe(0);
+
+    const cert1 = CertificateFactory.create(
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      Content.fromText("count-test-1"),
+      new Date("2026-03-18T11:00:00.000Z"),
+      {
+        chainIndex: 0,
+        previousCertificateDigest:
+          "0000000000000000000000000000000000000000000000000000000000000000",
+        cubepathUnixTimeCheckedAt: null,
+        cubepathUnixTimeSourceHash: null,
+        cubepathStatusCheckedAt: null,
+        cubepathStatusSourceHash: null
+      }
+    );
+
+    await repository.save(cert1);
+    expect(await repository.count()).toBe(1);
+
+    const cert2 = CertificateFactory.create(
+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      Content.fromText("count-test-2"),
+      new Date("2026-03-18T11:01:00.000Z"),
+      {
+        chainIndex: 1,
+        previousCertificateDigest: cert1.certificateDigest,
+        cubepathUnixTimeCheckedAt: null,
+        cubepathUnixTimeSourceHash: null,
+        cubepathStatusCheckedAt: null,
+        cubepathStatusSourceHash: null
+      }
+    );
+
+    await repository.save(cert2);
+    expect(await repository.count()).toBe(2);
+  });
 });

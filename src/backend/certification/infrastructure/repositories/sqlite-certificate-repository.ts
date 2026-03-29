@@ -146,4 +146,54 @@ export class SqliteCertificateRepository implements CertificateRepository {
       storesOriginalContent: Boolean(row.stores_original_content)
     });
   }
+
+  async findByHash(hash: string): Promise<Certificate | null> {
+    const row = this.db
+      .query(
+        `SELECT id, hash, timestamp, file_name, content_type, original_content_preview
+         , chain_index, previous_certificate_digest, certificate_digest
+         , cubepath_unixtime_checked_at, cubepath_unixtime_source_hash
+         , cubepath_status_checked_at, cubepath_status_source_hash
+         , stores_file_name, stores_original_content
+         FROM certificates
+         WHERE hash = ?
+         ORDER BY chain_index DESC
+         LIMIT 1`
+      )
+      .get(hash) as CertificateRow | null;
+
+    if (!row) {
+      return null;
+    }
+
+    return new Certificate({
+      id: row.id,
+      hash: row.hash,
+      timestamp: new Date(row.timestamp),
+      fileName: row.file_name,
+      contentType: row.content_type,
+      originalContentPreview: row.original_content_preview,
+      chainIndex: row.chain_index,
+      previousCertificateDigest: row.previous_certificate_digest,
+      certificateDigest: row.certificate_digest,
+      cubepathUnixTimeCheckedAt: row.cubepath_unixtime_checked_at
+        ? new Date(row.cubepath_unixtime_checked_at)
+        : null,
+      cubepathUnixTimeSourceHash: row.cubepath_unixtime_source_hash,
+      cubepathStatusCheckedAt: row.cubepath_status_checked_at
+        ? new Date(row.cubepath_status_checked_at)
+        : null,
+      cubepathStatusSourceHash: row.cubepath_status_source_hash,
+      storesFileName: Boolean(row.stores_file_name),
+      storesOriginalContent: Boolean(row.stores_original_content)
+    });
+  }
+
+  async count(): Promise<number> {
+    const row = this.db
+      .query("SELECT COUNT(*) as total FROM certificates")
+      .get() as { total: number };
+
+    return row.total;
+  }
 }

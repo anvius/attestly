@@ -7,6 +7,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.4.0] — 2026-03-24
+
+### Added
+
+- **Verify page**: new `/verify` route lets third parties upload a file to check if it was previously certified; shows hash, match result, and link to certificate.
+- **Text certification**: certify plain text directly from the home page via a File/Text tab switcher; new `POST /api/certify-text` endpoint.
+- **Certificate counter**: home page displays a live count of total certified files; new `GET /api/certificates/count` endpoint.
+- **Example certificate link**: "See a certificate example" link on home page that points to the latest issued certificate; new `GET /api/certificates/latest` endpoint.
+- **Navigation**: "Verify" link added to the site header.
+- **i18n**: full Spanish and English translations for all new features.
+- **Tests**: 14 new tests (unit for VerifyHashUseCase + CountCertificatesUseCase, integration for findByHash + count in SQLite repo, controller tests for verify, count, certify-text, and latest endpoints). Total: 58 tests.
+
 ## [1.3.2] — 2026-03-24
 
 ### Fixed

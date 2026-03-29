@@ -2,7 +2,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { certifyFile, getPublicConfig } from "$lib/api";
+  import { certifyFile, certifyText, getCertificateCount, getLatestCertificateId, getPublicConfig } from "$lib/api";
   import { language, brandedT } from "$lib/preferences";
   import { formatBytes } from "$lib/utils/format";
   import Hero from "$lib/components/hero.svelte";
@@ -17,6 +17,10 @@
   let maxUploadBytes = 25 * 1024 * 1024;
   let fileInput: HTMLInputElement | null = null;
   let inputFiles: FileList | null = null;
+  let activeTab: "file" | "text" = "file";
+  let textInput = "";
+  let certCount: number | null = null;
+  let exampleCertId: string | null = null;
 
   $: t = $brandedT;
   $: isImage = selectedFile?.type.startsWith("image/") ?? false;
@@ -45,6 +49,26 @@
       status = t.loading;
 
       const result = await certifyFile(selectedFile);
+
+      status = t.success;
+      await goto(`/cert/${result.id}`);
+    } catch {
+      error = t.error;
+      status = "";
+    } finally {
+      loading = false;
+    }
+  }
+
+  async function submitTextCertification(): Promise<void> {
+    if (!textInput.trim()) return;
+
+    try {
+      error = "";
+      loading = true;
+      status = t.loading;
+
+      const result = await certifyText(textInput);
 
       status = t.success;
       await goto(`/cert/${result.id}`);
@@ -133,6 +157,18 @@
       .catch(() => {
         maxUploadBytes = 25 * 1024 * 1024;
       });
+
+    void getCertificateCount()
+      .then((c) => {
+        certCount = c.total;
+      })
+      .catch(() => {});
+
+    void getLatestCertificateId()
+      .then((id) => {
+        exampleCertId = id;
+      })
+      .catch(() => {});
   });
 
   $: if (inputFiles && inputFiles.length > 0) {
@@ -175,33 +211,85 @@
     <p class="hint">{t.uploadTypes}</p>
     <p id="dropzone-kbd-hint" class="sr-only">{t.dropZoneKeyboardHint}</p>
 
-    <button class="btn btn-solid" type="button" on:click={triggerFilePicker}>{t.selectFile}</button>
-    <input
-      bind:this={fileInput}
-      bind:files={inputFiles}
-      id="certificate-file"
-      class="sr-only"
-      type="file"
-      name="certificate-file"
-      on:input={onFileInputChange}
-      on:change={onFileInputChange}
-    />
-
-    {#if selectedFile}
-      <FilePreview
-        {selectedFile}
-        {imagePreviewUrl}
-        {isImage}
-        {t}
-      />
+    {#if certCount !== null && certCount > 0}
+      <div class="cert-counter">
+        <span class="cert-counter-number">{certCount.toLocaleString()}</span>
+        <span class="cert-counter-label">{t.counterLabel}</span>
+      </div>
     {/if}
 
-    {#if selectedFile}
-      <button class="btn btn-solid certify-button" type="button" on:click={submitCertification} disabled={!canSubmit}>
+    <div class="tab-bar" role="tablist">
+      <button
+        class="tab-btn"
+        class:tab-active={activeTab === "file"}
+        type="button"
+        role="tab"
+        aria-selected={activeTab === "file"}
+        on:click={() => (activeTab = "file")}
+      >
+        {t.tabFile}
+      </button>
+      <button
+        class="tab-btn"
+        class:tab-active={activeTab === "text"}
+        type="button"
+        role="tab"
+        aria-selected={activeTab === "text"}
+        on:click={() => (activeTab = "text")}
+      >
+        {t.tabText}
+      </button>
+    </div>
+
+    {#if activeTab === "file"}
+      <button class="btn btn-solid" type="button" on:click={triggerFilePicker}>{t.selectFile}</button>
+      <input
+        bind:this={fileInput}
+        bind:files={inputFiles}
+        id="certificate-file"
+        class="sr-only"
+        type="file"
+        name="certificate-file"
+        on:input={onFileInputChange}
+        on:change={onFileInputChange}
+      />
+
+      {#if selectedFile}
+        <FilePreview
+          {selectedFile}
+          {imagePreviewUrl}
+          {isImage}
+          {t}
+        />
+      {/if}
+
+      {#if selectedFile}
+        <button class="btn btn-solid certify-button" type="button" on:click={submitCertification} disabled={!canSubmit}>
+          {#if loading}
+            {t.loading}
+          {:else}
+            {t.certify}
+          {/if}
+        </button>
+      {/if}
+    {:else}
+      <textarea
+        class="text-certify-input"
+        bind:value={textInput}
+        placeholder={t.textPlaceholder}
+        rows="6"
+      ></textarea>
+
+      <button
+        class="btn btn-solid certify-button"
+        type="button"
+        disabled={!textInput.trim() || loading}
+        on:click={submitTextCertification}
+      >
         {#if loading}
           {t.loading}
         {:else}
-          {t.certify}
+          {t.certifyText}
         {/if}
       </button>
     {/if}
@@ -211,6 +299,12 @@
     {/if}
     {#if error}
       <p aria-live="polite" class="status-error">{error}</p>
+    {/if}
+
+    {#if exampleCertId}
+      <a class="see-example-link" href="/cert/{exampleCertId}">
+        {t.seeExample} →
+      </a>
     {/if}
   </div>
 </section>

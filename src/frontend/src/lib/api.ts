@@ -130,3 +130,74 @@ export async function sendContactMessage(input: {
 
   return (await response.json()) as ContactResponseDto;
 }
+
+export type VerifyResultDto = {
+  verified: boolean;
+  hash: string;
+  certificate: {
+    id: string;
+    hash: string;
+    timestamp: string;
+    chainIndex: number;
+    certificateDigest: string;
+  } | null;
+};
+
+export type CertificateCountDto = {
+  total: number;
+};
+
+export async function verifyFile(file: File): Promise<VerifyResultDto> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_BASE_URL}/api/verify`, {
+    method: "POST",
+    body: formData
+  });
+
+  if (!response.ok) {
+    throw new Error("Verification failed");
+  }
+
+  return (await response.json()) as VerifyResultDto;
+}
+
+export async function getCertificateCount(
+  requestFetch: typeof fetch = fetch
+): Promise<CertificateCountDto> {
+  const response = await requestFetch(`${API_BASE_URL}/api/certificates/count`);
+
+  if (!response.ok) {
+    throw new Error("Count unavailable");
+  }
+
+  return (await response.json()) as CertificateCountDto;
+}
+
+export async function getLatestCertificateId(
+  requestFetch: typeof fetch = fetch
+): Promise<string | null> {
+  const response = await requestFetch(`${API_BASE_URL}/api/certificates/latest`);
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const data = (await response.json()) as { id: string | null };
+  return data.id;
+}
+
+export async function certifyText(text: string): Promise<CertificateDto> {
+  const response = await fetch(`${API_BASE_URL}/api/certify-text`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ text })
+  });
+
+  if (!response.ok) {
+    throw new Error("Text certification failed");
+  }
+
+  return (await response.json()) as CertificateDto;
+}

@@ -1,9 +1,14 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { CertifyContentUseCase } from "../../certification/application/certify-content-use-case";
+import { CountCertificatesUseCase } from "../../certification/application/count-certificates-use-case";
 import { GetCertificateUseCase } from "../../certification/application/get-certificate-use-case";
+import { VerifyHashUseCase } from "../../certification/application/verify-hash-use-case";
 import { buildCertifyController } from "../../certification/infrastructure/controllers/certify-controller";
+import { buildCertifyTextController } from "../../certification/infrastructure/controllers/certify-text-controller";
+import { buildCountController } from "../../certification/infrastructure/controllers/count-controller";
 import { buildGetCertificateController } from "../../certification/infrastructure/controllers/get-certificate-controller";
+import { buildVerifyController } from "../../certification/infrastructure/controllers/verify-controller";
 import { CubepathTimeEvidenceProvider } from "../../certification/infrastructure/providers/cubepath-time-evidence-provider";
 import { NodeCryptoHashProvider } from "../../certification/infrastructure/providers/node-crypto-hash-provider";
 import { SqliteCertificateRepository } from "../../certification/infrastructure/repositories/sqlite-certificate-repository";
@@ -25,6 +30,8 @@ export function createServerApp(): Hono {
     evidenceProvider
   );
   const getCertificateUseCase = new GetCertificateUseCase(certificateRepository);
+  const verifyHashUseCase = new VerifyHashUseCase(certificateRepository);
+  const countCertificatesUseCase = new CountCertificatesUseCase(certificateRepository);
   const contactMessageSender: ContactMessageSender =
     process.env.DISABLE_SMTP === "1" || appConfig.contact.smtp.host === "smtp.example.com"
       ? {
@@ -58,6 +65,16 @@ export function createServerApp(): Hono {
     })
   );
   app.route("/api", buildGetCertificateController({ getCertificateUseCase }));
+  app.route(
+    "/api",
+    buildVerifyController({
+      verifyHashUseCase,
+      hashProvider,
+      maxUploadBytes: appConfig.certification.maxUploadBytes
+    })
+  );
+  app.route("/api", buildCountController({ countCertificatesUseCase, certificateRepository }));
+  app.route("/api", buildCertifyTextController({ certifyContentUseCase }));
   app.route(
     "/api",
     buildContactController({

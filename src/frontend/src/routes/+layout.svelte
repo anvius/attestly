@@ -131,7 +131,9 @@
         <span>{$brandingData?.name ?? "DOCCUM"}</span>
       </a>
 
-      <div class="main-nav"></div>
+      <div class="main-nav">
+        <a href="/verify">{t.navVerify}</a>
+      </div>
 
       <div class="actions" style="justify-self: end;">
         <div class="lang-wrap">

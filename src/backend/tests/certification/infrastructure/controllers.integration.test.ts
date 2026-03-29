@@ -4,6 +4,9 @@ import { CertificateFactory } from "../../../certification/domain/services/certi
 import { Content } from "../../../certification/domain/content";
 import { buildCertifyController } from "../../../certification/infrastructure/controllers/certify-controller";
 import { buildGetCertificateController } from "../../../certification/infrastructure/controllers/get-certificate-controller";
+import { buildVerifyController } from "../../../certification/infrastructure/controllers/verify-controller";
+import { buildCountController } from "../../../certification/infrastructure/controllers/count-controller";
+import { buildCertifyTextController } from "../../../certification/infrastructure/controllers/certify-text-controller";
 
 describe("Controllers", () => {
   it("certify controller returns 201", async () => {
@@ -59,6 +62,133 @@ describe("Controllers", () => {
     );
 
     const response = await app.request("http://localhost/api/cert/missing");
+    expect(response.status).toBe(404);
+  });
+
+  it("verify controller returns verified=false for unknown file", async () => {
+    const app = new Hono();
+    app.route(
+      "/api",
+      buildVerifyController({
+        verifyHashUseCase: {
+          execute: async () => null
+        } as never,
+        hashProvider: {
+          calculateHash: async () =>
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        } as never
+      })
+    );
+
+    const formData = new FormData();
+    formData.append(
+      "file",
+      new File([new TextEncoder().encode("unknown")], "unknown.txt", { type: "text/plain" })
+    );
+
+    const response = await app.request("http://localhost/api/verify", {
+      method: "POST",
+      body: formData
+    });
+
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { verified: boolean; hash: string };
+    expect(body.verified).toBe(false);
+    expect(body.hash).toBe("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+  });
+
+  it("count controller returns total", async () => {
+    const app = new Hono();
+    app.route(
+      "/api",
+      buildCountController({
+        countCertificatesUseCase: {
+          execute: async () => 7
+        } as never,
+        certificateRepository: {
+          findLatest: async () => null
+        } as never
+      })
+    );
+
+    const response = await app.request("http://localhost/api/certificates/count");
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { total: number };
+    expect(body.total).toBe(7);
+  });
+
+  it("certify-text controller returns 201 for valid text", async () => {
+    const fakeCert = CertificateFactory.create(
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      Content.fromText("hello world"),
+      new Date("2026-03-18T12:00:00.000Z"),
+      {
+        chainIndex: 0,
+        previousCertificateDigest:
+          "0000000000000000000000000000000000000000000000000000000000000000",
+        cubepathUnixTimeCheckedAt: null,
+        cubepathUnixTimeSourceHash: null,
+        cubepathStatusCheckedAt: null,
+        cubepathStatusSourceHash: null
+      }
+    );
+
+    const app = new Hono();
+    app.route(
+      "/api",
+      buildCertifyTextController({
+        certifyContentUseCase: {
+          execute: async () => fakeCert
+        } as never
+      })
+    );
+
+    const response = await app.request("http://localhost/api/certify-text", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text: "hello world" })
+    });
+
+    expect(response.status).toBe(201);
+    const body = (await response.json()) as { id: string; hash: string };
+    expect(body.id).toBe(fakeCert.id);
+  });
+
+  it("certify-text controller returns 400 for empty text", async () => {
+    const app = new Hono();
+    app.route(
+      "/api",
+      buildCertifyTextController({
+        certifyContentUseCase: {
+          execute: async () => null
+        } as never
+      })
+    );
+
+    const response = await app.request("http://localhost/api/certify-text", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text: "" })
+    });
+
+    expect(response.status).toBe(400);
+  });
+
+  it("latest controller returns 404 when no certificates", async () => {
+    const app = new Hono();
+    app.route(
+      "/api",
+      buildCountController({
+        countCertificatesUseCase: {
+          execute: async () => 0
+        } as never,
+        certificateRepository: {
+          findLatest: async () => null
+        } as never
+      })
+    );
+
+    const response = await app.request("http://localhost/api/certificates/latest");
     expect(response.status).toBe(404);
   });
 });
