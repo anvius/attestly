@@ -1,6 +1,7 @@
 
 <script lang="ts">
   import { language, brandedT } from "$lib/preferences";
+  import CertAnimation from "$lib/components/cert-animation.svelte";
 
   $: t = $brandedT;
 </script>
@@ -12,6 +13,7 @@
 <section class="content-page">
   <article class="content-card">
     <h1>{t.processTitle}</h1>
+    <CertAnimation />
 
     {#if $language === "es"}
       <p>
